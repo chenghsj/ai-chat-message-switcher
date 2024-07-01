@@ -1,17 +1,11 @@
 import { storage } from '@src/config/stroage';
+import { useContextMenu } from '@src/hooks/use-context-menu';
+import { useDraggable } from '@src/hooks/use-draggable';
 import { cn } from '@src/utils/cn';
 
-export function CheckboxGroup({
-  pinned,
-  setPinned,
-  isDraggable,
-  setIsDraggable,
-}: {
-  pinned: boolean;
-  setPinned: React.Dispatch<React.SetStateAction<boolean>>;
-  isDraggable: boolean;
-  setIsDraggable: React.Dispatch<React.SetStateAction<boolean>>;
-}) {
+export function CheckboxGroup() {
+  const { pinned, setPinned } = useContextMenu();
+  const { isDraggable, setIsDraggable } = useDraggable();
   const inputClassName = cn(
     'appearance-none rounded-sm outline-none checked:text-zinc-600',
     'focus:ring-0 focus:ring-offset-0 dark:checked:border-zinc-300 dark:hover:border-zinc-300'

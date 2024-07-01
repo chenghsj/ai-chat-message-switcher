@@ -3,14 +3,17 @@ import { AppProvider } from './app-providers';
 import { ChatNodeList } from './chat-node-list';
 import { ContextMenu } from './context-menu';
 import { ControlPanel } from './control-panel';
+import { ResizableCompnent } from './resizable';
 
 const App: React.FC = () => {
   return (
     <AppProvider>
       <ControlPanel />
-      <ContextMenu width={400} height={400} triggerId='trigger'>
-        <ChatNodeList role='user' />
-      </ContextMenu>
+      <ResizableCompnent>
+        <ContextMenu triggerId='trigger'>
+          <ChatNodeList role='user' />
+        </ContextMenu>
+      </ResizableCompnent>
     </AppProvider>
   );
 };

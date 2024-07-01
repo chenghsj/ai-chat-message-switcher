@@ -1,5 +1,6 @@
 import React, { ReactNode, useEffect, useRef, useState } from 'react';
 import { useChatNode } from '@src/hooks/use-chat-node';
+import { useSize } from '@src/hooks/use-size';
 import { capitalize } from '@src/utils/captilize';
 import { cn } from '@src/utils/cn';
 import { useContextMenu } from '../hooks/use-context-menu';
@@ -10,26 +11,26 @@ import { SearchBox } from './search-box';
 
 type ContextMenuProps = {
   children?: ReactNode;
-  width: number;
-  height: number;
   triggerId: string; // ID of the element that triggers the context menu
 };
 export const ContextMenu: React.FC<ContextMenuProps> = ({
   children,
-  width,
-  height,
   triggerId,
 }) => {
+  const { size, isResizing } = useSize();
+  const { width, height } = size;
   const { role, setRole } = useChatNode();
-  const { isVisible, setIsVisible, position, setPosition } = useContextMenu();
-  const { setSearchTerm } = useSearch();
   const {
-    position: draggedPosition,
-    isDraggable,
-    setIsDraggable,
-  } = useDraggable();
-  const [pinned, setPinned] = useState(false);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
+    isVisible,
+    setIsVisible,
+    setPosition,
+    setControlPanelSide,
+    offset,
+    setOffset,
+    pinned,
+  } = useContextMenu();
+  const { setSearchTerm } = useSearch();
+  const { position: draggedPosition } = useDraggable();
   const menuRef = useRef<HTMLDivElement>(null);
   const gap = 5;
   const handleContextMenu = (event: MouseEvent) => {
@@ -46,8 +47,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       const screenHeight = window.innerHeight;
       let adjustedX = rect.right + gap;
       let adjustedY = rect.top;
+      setControlPanelSide('left');
       // Adjust initial position for X
       if (adjustedX + width > screenWidth) {
+        setControlPanelSide('right');
         adjustedX = rect.left - width - gap; // Move to the left side of the trigger element
       }
       // Adjust initial position for Y
@@ -65,7 +68,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   };
   const handleClick = (event: MouseEvent) => {
-    if (pinned) return;
+    if (pinned || isResizing) return;
     const triggerElement = document.getElementById(triggerId);
     if (
       triggerElement &&
@@ -80,6 +83,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   };
   const adjustPositionWithinBounds = (x: number, y: number) => {
+    console.log('adjust');
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     const triggerElement = document.getElementById(triggerId);
@@ -90,9 +94,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     let adjustedX = x;
     let adjustedY = y;
     // Adjust X position
+    setControlPanelSide('right');
+    // TODO: fix the exceed issue
     if (adjustedX + width > screenWidth) {
       adjustedX = rect.left - width - gap; // Move to the left side of the trigger element
     } else if (adjustedX < gap) {
+      setControlPanelSide('left');
       adjustedX = rect.right + gap; // Move to the right side of the trigger element
     }
     // Adjust Y position
@@ -111,7 +118,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('click', handleClick);
     };
-  }, [draggedPosition, pinned]);
+  }, [draggedPosition, pinned, isResizing]);
 
   useEffect(() => {
     if (isVisible) {
@@ -132,8 +139,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
       style={{
-        top: `${position.y}px`,
-        left: `${position.x}px`,
+        top: 0,
+        left: 0,
         width: `${width}px`,
         height: `${height}px`,
       }}
@@ -152,12 +159,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           {capitalize(role)}
         </button>
-        <CheckboxGroup
-          pinned={pinned}
-          setPinned={setPinned}
-          isDraggable={isDraggable}
-          setIsDraggable={setIsDraggable}
-        />
+        <CheckboxGroup />
       </div>
       <SearchBox />
       {children}

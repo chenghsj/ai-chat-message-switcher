@@ -17,6 +17,7 @@ export const ControlPanel: React.FC = () => {
   });
 
   const updateDisableState = (index: number) => {
+    // Fix: the first node should disable the button
     setDisable({
       up: index === -1,
       down: index === nodes.length - 1,

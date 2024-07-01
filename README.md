@@ -1,5 +1,9 @@
 # ChatGPT Message Switcher
 
+[Chrome](https://chrome.google.com/webstore/detail/eihabkibbhhklajnohjngcnfgnobodbj)
+<br>
+[Edge]()
+
 ## Key Features:
 
 - **Easy Navigation:** Use up and down buttons to move through user and assistant messages separately.
@@ -9,7 +13,7 @@
 
 ## Instructions
 
-- **Open Chat List:** Right-click to open the chat list.
+- **Open Chat List:** Right-click the panel to open the chat list.
 - **Draggable Panel:** Drag the panel using the dot in the panel. The panel can be fixed, and preferences will be saved in local storage.
 - **Stay on Top:** Enable the "Stay on top" option to prevent the chat list from closing.
 - **Switch Chats:** Use the up and down arrow buttons in the panel to switch between chats.
