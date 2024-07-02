@@ -38,9 +38,15 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
 
     switch (data.handle) {
       case 'n':
+      case 'ne':
         newY = Math.max(position.y + (size.height - height), gap);
         break;
       case 'w':
+      case 'sw':
+        newX = Math.max(position.x + (size.width - width), gap);
+        break;
+      case 'nw':
+        newY = Math.max(position.y + (size.height - height), gap);
         newX = Math.max(position.x + (size.width - width), gap);
         break;
       case 's':
@@ -65,14 +71,14 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
   useEffect(() => {
     // TODO: add corner handles
     setHandles(
-      controlPanelSide === 'right' ? ['s', 'w', 'n'] : ['s', 'e', 'n']
+      controlPanelSide === 'right' ? ['s', 'w', 'n', 'nw', 'sw'] : ['s', 'e', 'n', 'ne', 'se']
     );
   }, [controlPanelSide]);
 
   return (
     <div
       className={cn(
-        'absolute',
+        'absolute select-none',
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
       style={{ top: position.y, left: position.x }}
@@ -88,13 +94,19 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
             ref={ref}
             className={cn(
               'absolute',
-              resizeHandle === 's' || resizeHandle === 'n'
-                ? 'left-0 h-4 w-full cursor-row-resize'
-                : 'top-0 h-full w-4 cursor-col-resize',
-              resizeHandle === 's' && 'bottom-0',
-              resizeHandle === 'n' && 'top-0',
-              resizeHandle === 'w' && 'left-0',
-              resizeHandle === 'e' && 'right-0'
+              {
+                'left-1/2 -translate-x-1/2 h-4 w-[90%]': resizeHandle === 's' || resizeHandle === 'n',
+                'top-1/2 -translate-y-1/2 h-[90%] w-4': resizeHandle === 'w' || resizeHandle === 'e',
+                'w-4 h-4': resizeHandle === 'sw' || resizeHandle === 'se' || resizeHandle === 'nw' || resizeHandle === 'ne',
+              },
+              resizeHandle === 's' && 'cursor-s-resize bottom-0',
+              resizeHandle === 'n' && 'cursor-n-resize top-0',
+              resizeHandle === 'w' && 'cursor-w-resize left-0',
+              resizeHandle === 'e' && 'cursor-e-resize right-0',
+              resizeHandle === 'sw' && 'cursor-sw-resize bottom-0 left-0',
+              resizeHandle === 'se' && 'cursor-se-resize bottom-0 right-0',
+              resizeHandle === 'nw' && 'cursor-nw-resize top-0 left-0',
+              resizeHandle === 'ne' && 'cursor-ne-resize top-0 right-0'
             )}
           />
         )}

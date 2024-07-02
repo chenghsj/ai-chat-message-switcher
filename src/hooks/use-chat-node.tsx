@@ -7,6 +7,8 @@ interface ChatNodeContextProps {
   setClickNodeIndex: React.Dispatch<React.SetStateAction<number | null>>;
   role: ChatNodeRoleType;
   setRole: React.Dispatch<React.SetStateAction<ChatNodeRoleType>>;
+  isExpanded: boolean[];
+  setIsExpanded: React.Dispatch<React.SetStateAction<boolean[]>>;
 }
 
 export const chatNodeRole = {
@@ -25,6 +27,7 @@ export const ChatNodeProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [clickNodeIndex, setClickNodeIndex] = useState<number | null>(null);
   const [role, setRole] = useState<ChatNodeRoleType>('user');
+  const [isExpanded, setIsExpanded] = useState<boolean[]>([]);
 
   const nodes = useElementsWithAttribute(
     'data-message-author-role',
@@ -39,6 +42,8 @@ export const ChatNodeProvider: React.FC<{ children: React.ReactNode }> = ({
         nodes,
         role,
         setRole,
+        isExpanded,
+        setIsExpanded,
       }}
     >
       {children}

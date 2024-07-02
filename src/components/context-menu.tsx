@@ -31,6 +31,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   } = useContextMenu();
   const { setSearchTerm } = useSearch();
   const { position: draggedPosition } = useDraggable();
+  const { setIsExpanded, nodes: roleNodes } = useChatNode();
   const menuRef = useRef<HTMLDivElement>(null);
   const gap = 5;
   const handleContextMenu = (event: MouseEvent) => {
@@ -83,7 +84,6 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   };
   const adjustPositionWithinBounds = (x: number, y: number) => {
-    console.log('adjust');
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     const triggerElement = document.getElementById(triggerId);
@@ -144,6 +144,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         width: `${width}px`,
         height: `${height}px`,
       }}
+      onClick={() => !isResizing && setIsExpanded(new Array(roleNodes.length).fill(false))}
     >
       <div className='flex justify-between'>
         <button
