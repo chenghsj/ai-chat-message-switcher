@@ -56,7 +56,6 @@ export const ControlPanel: React.FC = () => {
     <Draggable
       triggerId='grab-trigger'
       // 36 is the width of the trigger element
-      initialPosition={{ x: `100% - ${36 + 20}px`, y: `50% - 60px` }}
     >
       <div
         className={cn(

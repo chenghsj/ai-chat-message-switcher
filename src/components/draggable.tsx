@@ -1,58 +1,79 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
+import { setStorageData } from '@src/config/storage';
 import { useDraggable } from '../hooks/use-draggable';
 
-interface Position {
-  x: string | number;
-  y: string | number;
-}
-
 interface DraggableProps {
-  initialPosition: Position;
   triggerId: string;
   children: React.ReactNode;
 }
 
-const parsePosition = (pos: string | number, axis: 'x' | 'y'): number => {
-  if (typeof pos === 'number') {
-    return pos;
-  }
-
-  const percentageMatch = pos.match(/([0-9]+)%/);
-  const offsetMatch = pos.match(/([-+]?[0-9]+)px$/);
-  const operatorMatch = pos.match(/([-+])/);
-
-  if (percentageMatch) {
-    const percentage = parseFloat(percentageMatch[1]);
-    const offset = offsetMatch ? parseFloat(offsetMatch[1]) : 0;
-    const operator = operatorMatch ? operatorMatch[0] : '+';
-    const parentSize = axis === 'x' ? window.innerWidth : window.innerHeight;
-
-    return operator === '+'
-      ? (parentSize * percentage) / 100 + offset
-      : (parentSize * percentage) / 100 - offset;
-  } else {
-    return parseFloat(pos);
-  }
-};
-
 export const Draggable: React.FC<DraggableProps> = ({
-  initialPosition,
   triggerId,
   children,
 }) => {
   const { position, setPosition, isDraggable } = useDraggable();
-
-  const initialX = parsePosition(initialPosition.x, 'x');
-  const initialY = parsePosition(initialPosition.y, 'y');
-
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  const handleMouseMove = (
+    event: MouseEvent,
+    initialMouseX: number,
+    initialMouseY: number,
+    initialElementX: number,
+    initialElementY: number
+  ) => {
+    const deltaX = event.clientX - initialMouseX;
+    const deltaY = event.clientY - initialMouseY;
+
+    // Calculate new position
+    let newX = initialElementX + deltaX;
+    let newY = initialElementY + deltaY;
+
+    // Get the dimensions of the draggable element
+    const elementWidth = ref.current?.offsetWidth || 0;
+    const elementHeight = ref.current?.offsetHeight || 0;
+
+    // Boundary checks with 5px margin
+    const margin = 5;
+    newX = Math.max(
+      margin,
+      Math.min(newX, window.innerWidth - elementWidth - margin)
+    );
+    newY = Math.max(
+      margin,
+      Math.min(newY, window.innerHeight - elementHeight - margin)
+    );
+
     setPosition({
-      x: initialX,
-      y: initialY,
+      x: newX,
+      y: newY,
     });
-  }, [initialX, initialY, setPosition]);
+  };
+
+  const handleMouseUp = async (
+    event: MouseEvent,
+    initialMouseX: number,
+    initialMouseY: number,
+    initialElementX: number,
+    initialElementY: number
+  ) => {
+    // Ensure to capture the final mouse position
+    const deltaX = event.clientX - initialMouseX;
+    const deltaY = event.clientY - initialMouseY;
+
+    const newX = initialElementX + deltaX;
+    const newY = initialElementY + deltaY;
+
+    document.removeEventListener('mousemove', boundMouseMove);
+    document.removeEventListener('mouseup', boundMouseUp);
+
+    await setStorageData((data) => ({
+      ...data,
+      draggedPosition: { x: newX, y: newY },
+    }));
+  };
+
+  let boundMouseMove: (event: MouseEvent) => void;
+  let boundMouseUp: (event: MouseEvent) => void;
 
   const handleMouseDown = (event: React.MouseEvent) => {
     if (!isDraggable) return;
@@ -61,45 +82,27 @@ export const Draggable: React.FC<DraggableProps> = ({
     const initialMouseY = event.clientY;
     const initialElementX = position.x;
     const initialElementY = position.y;
-    let isDragging = false;
 
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      isDragging = true;
-      const deltaX = moveEvent.clientX - initialMouseX;
-      const deltaY = moveEvent.clientY - initialMouseY;
-
-      // Calculate new position
-      let newX = initialElementX + deltaX;
-      let newY = initialElementY + deltaY;
-
-      // Get the dimensions of the draggable element
-      const elementWidth = ref.current?.offsetWidth || 0;
-      const elementHeight = ref.current?.offsetHeight || 0;
-
-      // Boundary checks with 5px margin
-      const margin = 5;
-      newX = Math.max(
-        margin,
-        Math.min(newX, window.innerWidth - elementWidth - margin)
-      );
-      newY = Math.max(
-        margin,
-        Math.min(newY, window.innerHeight - elementHeight - margin)
+    boundMouseMove = (moveEvent) =>
+      handleMouseMove(
+        moveEvent,
+        initialMouseX,
+        initialMouseY,
+        initialElementX,
+        initialElementY
       );
 
-      setPosition({
-        x: newX,
-        y: newY,
-      });
-    };
+    boundMouseUp = (moveEvent) =>
+      handleMouseUp(
+        moveEvent,
+        initialMouseX,
+        initialMouseY,
+        initialElementX,
+        initialElementY
+      );
 
-    const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove);
-      document.removeEventListener('mouseup', handleMouseUp);
-    };
-
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', boundMouseMove);
+    document.addEventListener('mouseup', boundMouseUp);
   };
 
   return (

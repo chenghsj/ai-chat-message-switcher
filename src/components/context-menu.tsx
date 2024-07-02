@@ -1,7 +1,7 @@
-import React, { ReactNode, useEffect, useRef, useState } from 'react';
+import React, { ReactNode, useEffect, useRef } from 'react';
 import { useChatNode } from '@src/hooks/use-chat-node';
 import { useSize } from '@src/hooks/use-size';
-import { capitalize } from '@src/utils/captilize';
+import { capitalize } from '@src/utils/capitalize';
 import { cn } from '@src/utils/cn';
 import { useContextMenu } from '../hooks/use-context-menu';
 import { useDraggable } from '../hooks/use-draggable';
@@ -13,6 +13,7 @@ type ContextMenuProps = {
   children?: ReactNode;
   triggerId: string; // ID of the element that triggers the context menu
 };
+
 export const ContextMenu: React.FC<ContextMenuProps> = ({
   children,
   triggerId,
@@ -34,33 +35,42 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   const { setIsExpanded, nodes: roleNodes } = useChatNode();
   const menuRef = useRef<HTMLDivElement>(null);
   const gap = 5;
+
+  const getTriggerElementRect = () => {
+    const triggerElement = document.getElementById(triggerId);
+    return triggerElement?.getBoundingClientRect();
+  };
+
   const handleContextMenu = (event: MouseEvent) => {
     if (pinned) return;
-    const triggerElement = document.getElementById(triggerId);
+
+    const rect = getTriggerElementRect();
+    const target = event.target as Node;
     if (
-      triggerElement &&
-      (event.target === triggerElement ||
-        triggerElement.contains(event.target as Node))
+      rect &&
+      (target === document.getElementById(triggerId) ||
+        document.getElementById(triggerId)?.contains(target))
     ) {
       event.preventDefault();
-      const rect = triggerElement.getBoundingClientRect();
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
       let adjustedX = rect.right + gap;
-      let adjustedY = rect.top;
-      setControlPanelSide('left');
-      // Adjust initial position for X
+      let adjustedY = rect.top - height / 2 + rect.height / 2;
+
       if (adjustedX + width > screenWidth) {
+        adjustedX = rect.left - width - gap;
         setControlPanelSide('right');
-        adjustedX = rect.left - width - gap; // Move to the left side of the trigger element
+      } else {
+        setControlPanelSide('left');
       }
-      // Adjust initial position for Y
+
       if (adjustedY + height > screenHeight) {
         adjustedY = screenHeight - height - gap;
       }
       if (adjustedY < gap) {
         adjustedY = gap;
       }
+
       const offsetX = adjustedX - draggedPosition.x;
       const offsetY = adjustedY - draggedPosition.y;
       setOffset({ x: offsetX, y: offsetY });
@@ -68,47 +78,71 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       setIsVisible(true);
     }
   };
+
   const handleClick = (event: MouseEvent) => {
     if (pinned || isResizing) return;
-    const triggerElement = document.getElementById(triggerId);
+
+    const rect = getTriggerElementRect();
+    const target = event.target as Node;
     if (
-      triggerElement &&
-      (event.target === triggerElement ||
-        triggerElement.contains(event.target as Node))
+      rect &&
+      (target === document.getElementById(triggerId) ||
+        document.getElementById(triggerId)?.contains(target))
     ) {
       return;
     }
-    if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+    if (menuRef.current && !menuRef.current.contains(target)) {
       setIsVisible(false);
       setSearchTerm('');
     }
   };
+
   const adjustPositionWithinBounds = (x: number, y: number) => {
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
-    const triggerElement = document.getElementById(triggerId);
-    if (!triggerElement) {
-      return { x, y };
-    }
-    const rect = triggerElement.getBoundingClientRect();
+    const rect = getTriggerElementRect();
+    if (!rect) return { x, y };
+
     let adjustedX = x;
-    let adjustedY = y;
-    // Adjust X position
-    setControlPanelSide('right');
-    // TODO: fix the exceed issue
+    let adjustedY = rect.top - height / 2 + rect.height / 2;
+
     if (adjustedX + width > screenWidth) {
-      adjustedX = rect.left - width - gap; // Move to the left side of the trigger element
+      adjustedX = rect.left - width - gap;
+      setControlPanelSide('right');
     } else if (adjustedX < gap) {
+      adjustedX = rect.right + gap;
       setControlPanelSide('left');
-      adjustedX = rect.right + gap; // Move to the right side of the trigger element
+      if (adjustedX + width > screenWidth) {
+        adjustedX = x;
+      }
+    } else {
+      setControlPanelSide(adjustedX > rect.left ? 'left' : 'right');
     }
-    // Adjust Y position
+
     if (adjustedY + height > screenHeight) {
       adjustedY = screenHeight - height - gap;
     } else if (adjustedY < gap) {
       adjustedY = gap;
     }
+
     return { x: adjustedX, y: adjustedY };
+  };
+
+  const adjustVerticalPosition = () => {
+    if (isVisible) {
+      const screenHeight = window.innerHeight;
+      const rect = getTriggerElementRect();
+      if (rect) {
+        let adjustedY = rect.top - height / 2 + rect.height / 2;
+        if (adjustedY + height > screenHeight) {
+          adjustedY = screenHeight - height - gap;
+        }
+        if (adjustedY < gap) {
+          adjustedY = gap;
+        }
+        setPosition((prevPosition) => ({ ...prevPosition, y: adjustedY }));
+      }
+    }
   };
 
   useEffect(() => {
@@ -118,16 +152,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       document.removeEventListener('contextmenu', handleContextMenu);
       document.removeEventListener('click', handleClick);
     };
-  }, [draggedPosition, pinned, isResizing]);
+  }, [draggedPosition, pinned, isResizing, isVisible]);
 
   useEffect(() => {
-    if (isVisible) {
-      let newX = draggedPosition.x + offset.x;
-      let newY = draggedPosition.y + offset.y;
+    if (isVisible && !isResizing) {
+      const newX = draggedPosition.x + offset.x;
+      const newY = draggedPosition.y + offset.y;
       const adjustedPosition = adjustPositionWithinBounds(newX, newY);
       setPosition(adjustedPosition);
     }
-  }, [draggedPosition, isVisible]);
+  }, [draggedPosition, isVisible, offset.x, offset.y]);
+
+  useEffect(() => {
+    if (isVisible && !isResizing) {
+      adjustVerticalPosition();
+    }
+  }, [height, isVisible, isResizing]);
 
   return (
     <div
@@ -138,13 +178,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         'dark:border-none dark:bg-zinc-700 dark:shadow-md dark:shadow-zinc-800',
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
-      style={{
-        top: 0,
-        left: 0,
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-      onClick={() => !isResizing && setIsExpanded(new Array(roleNodes.length).fill(false))}
+      style={{ top: 0, left: 0, width: `${width}px`, height: `${height}px` }}
+      onClick={() =>
+        !isResizing && setIsExpanded(new Array(roleNodes.length).fill(false))
+      }
     >
       <div className='flex justify-between'>
         <button
@@ -159,6 +196,19 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           }}
         >
           {capitalize(role)}
+        </button>
+        <button
+          onClick={() => {
+            chrome.storage.sync.clear(function () {
+              if (chrome.runtime.lastError) {
+                console.error(chrome.runtime.lastError);
+              } else {
+                console.log('chrome.storage.sync data cleared.');
+              }
+            });
+          }}
+        >
+          Clear
         </button>
         <CheckboxGroup />
       </div>

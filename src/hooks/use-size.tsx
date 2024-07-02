@@ -1,5 +1,13 @@
-// SizeContext.tsx
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import React, {
+  Dispatch,
+  ReactNode,
+  SetStateAction,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { getStorageData } from '@src/config/storage';
 
 type SizeType = {
   width: number;
@@ -8,9 +16,9 @@ type SizeType = {
 
 interface SizeContextType {
   size: SizeType;
-  setSize: React.Dispatch<React.SetStateAction<SizeType>>;
+  setSize: Dispatch<SetStateAction<SizeType>>;
   isResizing: boolean;
-  setIsResizing: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsResizing: Dispatch<SetStateAction<boolean>>;
 }
 
 const SizeContext = createContext<SizeContextType | undefined>(undefined);
@@ -20,14 +28,23 @@ interface SizeProviderProps {
   initialSize: SizeType;
 }
 
-const defaultSize = { width: 400, height: 400 };
-
 export const SizeProvider: React.FC<SizeProviderProps> = ({
   children,
-  initialSize = defaultSize,
+  initialSize,
 }) => {
-  const [size, setSize] = useState(initialSize);
-  const [isResizing, setIsResizing] = useState(false);
+  const [size, setSize] = useState<SizeType>(initialSize);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchStorageData = async () => {
+      const data = await getStorageData();
+      if (data?.size) {
+        setSize(data.size);
+      }
+    };
+
+    fetchStorageData();
+  }, []);
 
   return (
     <SizeContext.Provider value={{ size, setSize, isResizing, setIsResizing }}>
@@ -36,7 +53,7 @@ export const SizeProvider: React.FC<SizeProviderProps> = ({
   );
 };
 
-export const useSize = () => {
+export const useSize = (): SizeContextType => {
   const context = useContext(SizeContext);
   if (context === undefined) {
     throw new Error('useSize must be used within a SizeProvider');

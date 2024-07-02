@@ -1,16 +1,24 @@
-import React, { ReactNode, createContext, useContext, useState } from 'react';
+import React, {
+  ReactNode,
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
+import { getStorageData } from '@src/config/storage';
+import { Position } from '@src/config/types';
 
 type ControlPanelSide = 'left' | 'right';
 
 interface ContextMenuContextType {
   isVisible: boolean;
   setIsVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  position: { x: number; y: number };
-  setPosition: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  position: Position;
+  setPosition: React.Dispatch<React.SetStateAction<Position>>;
   controlPanelSide: ControlPanelSide;
   setControlPanelSide: React.Dispatch<React.SetStateAction<ControlPanelSide>>;
-  offset: { x: number; y: number };
-  setOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
+  offset: Position;
+  setOffset: React.Dispatch<React.SetStateAction<Position>>;
   pinned: boolean;
   setPinned: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -31,11 +39,20 @@ export const ContextMenuProvider: React.FC<ContextMenuProviderProps> = ({
   const [controlPanelSide, setControlPanelSide] =
     useState<ControlPanelSide>('right');
   // the offset is used to adjust the position of the context menu relative to the trigger element
-  const [offset, setOffset] = useState<{ x: number; y: number }>({
+  const [offset, setOffset] = useState<Position>({
     x: 0,
     y: 0,
   });
   const [pinned, setPinned] = useState(false);
+
+  useEffect(() => {
+    getStorageData().then((data) => {
+      if (data?.pinned) {
+        setIsVisible(true);
+      }
+      setPinned(data?.pinned ?? false);
+    });
+  }, []);
 
   return (
     <ContextMenuContext.Provider

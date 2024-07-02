@@ -1,8 +1,12 @@
 import React, { FC, ReactNode, useEffect, useState } from 'react';
-import { Resizable, ResizeCallbackData, ResizeHandle } from 'react-resizable';
+import {
+  Resizable as ResizableComponent,
+  ResizeCallbackData,
+  ResizeHandle,
+} from 'react-resizable';
 import 'react-resizable/css/styles.css';
+import { setStorageData } from '@src/config/storage';
 import { useContextMenu } from '@src/hooks/use-context-menu';
-import { useDraggable } from '@src/hooks/use-draggable';
 import { useSize } from '@src/hooks/use-size';
 import { cn } from '@src/utils/cn';
 
@@ -10,10 +14,24 @@ interface ResizableComponentProps {
   children?: ReactNode;
 }
 
-export const ResizableCompnent: FC<ResizableComponentProps> = ({
-  children,
-}) => {
-  const { size, setSize, setIsResizing, isResizing } = useSize();
+const getHandleClasses = (resizeHandle: ResizeHandle) => {
+  const baseClasses = 'absolute h-4 w-4';
+  const specificClasses: Record<ResizeHandle, string> = {
+    s: 'left-1/2 w-[90%] -translate-x-1/2 bottom-0 cursor-s-resize',
+    n: 'left-1/2 w-[90%] -translate-x-1/2 top-0 cursor-n-resize',
+    w: 'top-1/2 h-[90%] -translate-y-1/2 left-0 cursor-w-resize',
+    e: 'top-1/2 h-[90%] -translate-y-1/2 right-0 cursor-e-resize',
+    sw: 'left-0 bottom-0 cursor-sw-resize',
+    se: 'right-0 bottom-0 cursor-se-resize',
+    nw: 'left-0 top-0 cursor-nw-resize',
+    ne: 'right-0 top-0 cursor-ne-resize',
+  };
+
+  return cn(baseClasses, specificClasses[resizeHandle]);
+};
+
+export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
+  const { size, setSize, setIsResizing } = useSize();
   const {
     position,
     setPosition,
@@ -25,14 +43,22 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
 
   const [handles, setHandles] = useState<ResizeHandle[]>(['s', 'w', 'n']);
 
+  useEffect(() => {
+    setHandles(
+      controlPanelSide === 'right'
+        ? ['s', 'w', 'n', 'nw', 'sw']
+        : ['s', 'e', 'n', 'ne', 'se']
+    );
+  }, [controlPanelSide]);
+
   const handleResize = (
     event: React.SyntheticEvent<Element, Event>,
     data: ResizeCallbackData
   ) => {
+    const { width, height } = data.size;
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
     const gap = 5;
-    const { width, height } = data.size;
     let newX = position.x;
     let newY = position.y;
 
@@ -49,12 +75,6 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
         newY = Math.max(position.y + (size.height - height), gap);
         newX = Math.max(position.x + (size.width - width), gap);
         break;
-      case 's':
-        newY = position.y;
-        break;
-      case 'e':
-        newX = position.x;
-        break;
       default:
         break;
     }
@@ -63,17 +83,25 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
     const constrainedHeight = Math.min(height, screenHeight - newY - gap);
 
     setSize({ width: constrainedWidth, height: constrainedHeight });
-    // Fix: the resize handle not act as expected
-    setOffset({ ...offset, x: -constrainedWidth - gap });
+    setOffset({ ...offset, x: -constrainedWidth - gap })
     setPosition({ x: newX, y: newY });
   };
 
-  useEffect(() => {
-    // TODO: add corner handles
-    setHandles(
-      controlPanelSide === 'right' ? ['s', 'w', 'n', 'nw', 'sw'] : ['s', 'e', 'n', 'ne', 'se']
-    );
-  }, [controlPanelSide]);
+  const handleResizeStart = () => {
+    setIsResizing(true);
+  };
+
+  const handleResizeStop = async (
+    event: React.SyntheticEvent<Element, Event>,
+    data: ResizeCallbackData
+  ) => {
+    await setStorageData((storageData) => ({
+      ...storageData,
+      size: data.size,
+    }));
+
+    setIsResizing(false);
+  };
 
   return (
     <div
@@ -83,46 +111,22 @@ export const ResizableCompnent: FC<ResizableComponentProps> = ({
       )}
       style={{ top: position.y, left: position.x }}
     >
-      <Resizable
+      <ResizableComponent
         width={size.width}
         height={size.height}
         onResize={handleResize}
-        // handle={<CustomHandle />}
         resizeHandles={handles}
         handle={(resizeHandle, ref) => (
-          <div
-            ref={ref}
-            className={cn(
-              'absolute',
-              {
-                'left-1/2 -translate-x-1/2 h-4 w-[90%]': resizeHandle === 's' || resizeHandle === 'n',
-                'top-1/2 -translate-y-1/2 h-[90%] w-4': resizeHandle === 'w' || resizeHandle === 'e',
-                'w-4 h-4': resizeHandle === 'sw' || resizeHandle === 'se' || resizeHandle === 'nw' || resizeHandle === 'ne',
-              },
-              resizeHandle === 's' && 'cursor-s-resize bottom-0',
-              resizeHandle === 'n' && 'cursor-n-resize top-0',
-              resizeHandle === 'w' && 'cursor-w-resize left-0',
-              resizeHandle === 'e' && 'cursor-e-resize right-0',
-              resizeHandle === 'sw' && 'cursor-sw-resize bottom-0 left-0',
-              resizeHandle === 'se' && 'cursor-se-resize bottom-0 right-0',
-              resizeHandle === 'nw' && 'cursor-nw-resize top-0 left-0',
-              resizeHandle === 'ne' && 'cursor-ne-resize top-0 right-0'
-            )}
-          />
+          <div ref={ref} className={getHandleClasses(resizeHandle)} />
         )}
         axis='both'
-        onResizeStart={() => {
-          setIsResizing(true);
-        }}
-        onResizeStop={() => {
-          // prevent the context menu close after stop resizing
-          setTimeout(() => {
-            setIsResizing(false);
-          }, 0);
-        }}
+        onResizeStart={handleResizeStart}
+        onResizeStop={handleResizeStop}
       >
         {children}
-      </Resizable>
+      </ResizableComponent>
     </div>
   );
 };
+
+// TODO: show size info while resizing

@@ -1,5 +1,6 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useContextMenu } from '@src/hooks/use-context-menu';
+import { useSize } from '@src/hooks/use-size';
 import { useTriggerType } from '@src/hooks/use-trigger-type';
 import { cn } from '@src/utils/cn';
 import { findClosestDivIndex } from '@src/utils/find-closest-div-index';
@@ -17,11 +18,10 @@ const chatlistItemHeight = 40;
 
 export const ChatNodeList: React.FC<ChatNodeProps> = () => {
   const listRef = useRef<HTMLDivElement | null>(null);
+  const { size: contextMenuSize } = useSize();
   const { isVisible: isContextMenuVisible } = useContextMenu();
   const { triggerType, setTriggerType } = useTriggerType();
   const { isExpanded, setIsExpanded } = useChatNode();
-  const [visibleHeight, setVisibleHeight] = useState<number[]>([]);
-  const [invisibleHeight, setInvisibleHeight] = useState<number[]>([]);
   const { searchTerm } = useSearch();
   const {
     clickNodeIndex,
@@ -29,7 +29,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     nodes: roleNodes,
     role,
   } = useChatNode();
-  let parentElement = useMemo(
+  const parentElement = useMemo(
     () => findClosestScrollableElement(roleNodes[0]),
     [roleNodes]
   );
@@ -54,19 +54,20 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
 
   const calculateContentHeight = (index: number) => {
     const calculateInvisibleHeight = (index: number) => {
-      return itemRefs.current[index]?.getElementsByClassName('chat-text-content-invisible')[0].clientHeight!;
-    }
+      return itemRefs.current[index]?.getElementsByClassName(
+        'chat-text-content-invisible'
+      )[0].clientHeight!;
+    };
     return {
       invisible: calculateInvisibleHeight(index),
-      expandable: calculateInvisibleHeight(index) > chatlistItemHeight
-    }
-  }
+      expandable: calculateInvisibleHeight(index) > chatlistItemHeight,
+    };
+  };
 
   const handleExpandClick =
     (index: number) => (e: React.MouseEvent<HTMLDivElement>) => {
       e.stopPropagation();
-      if (!calculateContentHeight(index).expandable) return
-
+      if (!calculateContentHeight(index).expandable) return;
       setIsExpanded((prev) =>
         prev.map((_, i) => (i === index ? !prev[i] : false))
       );
@@ -76,11 +77,11 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     if (!isContextMenuVisible) {
       setIsExpanded(new Array(roleNodes.length).fill(false));
     }
-  }, [isContextMenuVisible]);
+  }, [isContextMenuVisible, roleNodes.length, setIsExpanded]);
 
   useEffect(() => {
     setIsExpanded(new Array(roleNodes.length).fill(false));
-  }, [role]);
+  }, [role, roleNodes.length, setIsExpanded]);
 
   useEffect(() => {
     itemRefs.current[clickNodeIndex as number]?.scrollIntoView({
@@ -92,7 +93,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
   useEffect(() => {
     setClickNodeIndex(roleNodes.length > 1 ? roleNodes.length - 1 : 0);
     setIsExpanded(new Array(roleNodes.length).fill(false));
-  }, [roleNodes.length]);
+  }, [roleNodes.length, setClickNodeIndex, setIsExpanded]);
 
   useEffect(() => {
     const handleScroll = throttle(() => {
@@ -107,14 +108,18 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     return () => {
       parentElement?.removeEventListener('scroll', handleScroll);
     };
-  }, [parentElement, roleNodes]);
-
+  }, [
+    parentElement,
+    roleNodes,
+    setClickNodeIndex,
+    setTriggerType,
+    triggerType,
+  ]);
+  // TODO: save role or not??
   return (
     <div
       ref={listRef}
-      className={cn(
-        'grid h-fit grid-cols-1 gap-2 overflow-y-auto pr-2'
-      )}
+      className={cn('grid h-fit grid-cols-1 gap-2 overflow-y-auto pr-2')}
     >
       {filterNodes.map((node, index) => (
         <div
@@ -123,35 +128,32 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           ref={(el) => (itemRefs.current[index] = el)}
           className={cn(
             'relative cursor-pointer overflow-hidden rounded-lg border shadow-sm transition-[height] duration-200',
-            'flex justify-between box-content',
-            {
-              'bg-gray-200 dark:bg-zinc-800': clickNodeIndex === index,
-            }
+            'box-content flex justify-between',
+            { 'bg-gray-200 dark:bg-zinc-800': clickNodeIndex === index }
           )}
           style={{
-            height: isExpanded[index] ? calculateContentHeight(index).invisible : chatlistItemHeight,
+            maxHeight: contextMenuSize.height / 2,
+            height: isExpanded[index]
+              ? calculateContentHeight(index).invisible
+              : chatlistItemHeight,
           }}
         >
           <div
-            // Invisible div to calculate the height of the text content
-            className={cn('chat-text-content-invisible', 'absolute border flex justify-between invisible w-full')}
+            className={cn(
+              'chat-text-content-invisible',
+              'invisible absolute flex w-full justify-between border'
+            )}
           >
-            <div
-              className={cn(
-                'py-2 pl-3',
-              )}
-              title={node.textContent || ''}
-            >
-              {node.textContent ? node.textContent : ''}
+            <div className={cn('py-2 pl-3')} title={node.textContent || ''}>
+              {node.textContent || ''}
             </div>
-            <div className='w-8 h-10'></div>
+            <div className='h-10 w-8'></div>
           </div>
 
           <div
-            // Visible div to display the text content
             className={cn(
               'chat-text-content-visible',
-              'flex-1 flex justify-between overflow-y-auto py-2 pl-3'
+              'flex flex-1 justify-between overflow-y-auto py-2 pl-3'
             )}
             onClick={() => {
               setTriggerType('context-menu-click');
@@ -160,34 +162,32 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           >
             <div
               className={cn(
-                'text-ellipsis whitespace-nowrap pr-1 text-sm transition w-full',
+                'w-full text-ellipsis whitespace-nowrap pr-1 text-sm transition',
                 isExpanded[index]
                   ? 'overflow-y-auto whitespace-pre-wrap'
                   : 'overflow-hidden whitespace-nowrap'
               )}
               title={node.textContent || ''}
             >
-              {node.textContent ? node.textContent : ''}
+              {node.textContent || ''}
             </div>
             <div className='sticky border-r border-zinc-400' />
           </div>
 
           <div
-            // TODO: Check if the text is ellipsed to disable the expand button
             className={cn(
-              `z-20 w-8 h-10 origin-center transform select-none transition duration-200`,
+              `z-20 h-10 w-8 origin-center transform select-none transition duration-200`,
               'flex items-center justify-center',
               isExpanded[index] ? 'rotate-180' : '',
-              calculateContentHeight(index).expandable ? 'opacity-100' : 'opacity-40',
-              calculateContentHeight(index).expandable ? 'cursor-pointer' : 'cursor-auto',
+              calculateContentHeight(index).expandable
+                ? 'cursor-pointer opacity-100'
+                : 'cursor-auto opacity-40'
             )}
             onClick={handleExpandClick(index)}
           >
             <ChevronDown className='scale-90' />
-
             {isExpanded[index] && (
               <div
-                // Expanded button with full height
                 className='absolute bottom-0 h-28 w-full'
                 onClick={handleExpandClick(index)}
               />

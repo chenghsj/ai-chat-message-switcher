@@ -40,7 +40,9 @@ function createProvider<TProps>(
 const providers = [
   createProvider(TriggerTypeProvider),
   createProvider(ChatNodeProvider),
-  createProvider(DraggableProvider),
+  createProvider(DraggableProvider, {
+    initialPosition: { x: `100% - ${36 + 20}px`, y: `50% - 60px` },
+  }),
   createProvider(SizeProvider, { initialSize: { width: 400, height: 400 } }),
   createProvider(ContextMenuProvider),
   createProvider(SearchProvider),
