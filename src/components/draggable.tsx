@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import { setStorageData } from '@src/config/storage';
+import { gap } from '@src/config/types';
 import { useDraggable } from '../hooks/use-draggable';
 
 interface DraggableProps {
@@ -32,15 +33,13 @@ export const Draggable: React.FC<DraggableProps> = ({
     const elementWidth = ref.current?.offsetWidth || 0;
     const elementHeight = ref.current?.offsetHeight || 0;
 
-    // Boundary checks with 5px margin
-    const margin = 5;
     newX = Math.max(
-      margin,
-      Math.min(newX, window.innerWidth - elementWidth - margin)
+      gap,
+      Math.min(newX, window.innerWidth - elementWidth - gap)
     );
     newY = Math.max(
-      margin,
-      Math.min(newY, window.innerHeight - elementHeight - margin)
+      gap,
+      Math.min(newY, window.innerHeight - elementHeight - gap)
     );
 
     setPosition({

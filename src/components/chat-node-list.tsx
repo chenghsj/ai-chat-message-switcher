@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useSize } from '@src/hooks/use-size';
 import { useTriggerType } from '@src/hooks/use-trigger-type';
@@ -119,7 +119,9 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
   return (
     <div
       ref={listRef}
-      className={cn('grid h-fit grid-cols-1 gap-2 overflow-y-auto pr-2')}
+      className={cn(
+        'grid h-fit grid-cols-1 gap-2 overflow-y-auto pr-2 dark:text-zinc-50'
+      )}
     >
       {filterNodes.map((node, index) => (
         <div
@@ -129,7 +131,8 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           className={cn(
             'relative cursor-pointer overflow-hidden rounded-lg border shadow-sm transition-[height] duration-200',
             'box-content flex justify-between',
-            { 'bg-gray-200 dark:bg-zinc-800': clickNodeIndex === index }
+            { 'bg-gray-200 dark:bg-zinc-900': clickNodeIndex === index },
+            { 'font-medium': !isExpanded[index] }
           )}
           style={{
             maxHeight: contextMenuSize.height / 2,
@@ -185,7 +188,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
             )}
             onClick={handleExpandClick(index)}
           >
-            <ChevronDown className='scale-90' />
+            <ChevronDown className='scale-75' />
             {isExpanded[index] && (
               <div
                 className='absolute bottom-0 h-28 w-full'

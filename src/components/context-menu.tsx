@@ -1,15 +1,19 @@
 import React, { ReactNode, useEffect, useRef } from 'react';
+import { Separator } from '@radix-ui/react-separator';
+import { setStorageData } from '@src/config/storage';
+import { Position, gap } from '@src/config/types';
 import { useChatNode } from '@src/hooks/use-chat-node';
 import { useSize } from '@src/hooks/use-size';
 import { capitalize } from '@src/utils/capitalize';
 import { cn } from '@src/utils/cn';
+import { Bot, Hand, Pin, User } from 'lucide-react';
 import { useContextMenu } from '../hooks/use-context-menu';
 import { useDraggable } from '../hooks/use-draggable';
 import { useSearch } from '../hooks/use-search';
-import { CheckboxGroup } from './check-box-group';
 import { SearchBox } from './search-box';
 import { SettingsMenu } from './settings-menu';
-import { useDropdown } from '@src/hooks/use-dropdown';
+import { Badge } from './ui/badge';
+import { Button } from './ui/button';
 
 type ContextMenuProps = {
   children?: ReactNode;
@@ -31,13 +35,16 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     offset,
     setOffset,
     pinned,
+    setPinned,
   } = useContextMenu();
-  const {open: dropdownIsOpen} = useDropdown();
   const { setSearchTerm } = useSearch();
-  const { position: draggedPosition } = useDraggable();
+  const {
+    position: draggedPosition,
+    isDraggable,
+    setIsDraggable,
+  } = useDraggable();
   const { setIsExpanded, nodes: roleNodes } = useChatNode();
   const menuRef = useRef<HTMLDivElement>(null);
-  const gap = 5;
 
   const getTriggerElementRect = () => {
     const triggerElement = document.getElementById(triggerId);
@@ -74,8 +81,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         adjustedY = gap;
       }
 
-      const offsetX = adjustedX - draggedPosition.x;
-      const offsetY = adjustedY - draggedPosition.y;
+      const offsetX = adjustedX - (draggedPosition as Position).x;
+      const offsetY = adjustedY - (draggedPosition as Position).y;
       setOffset({ x: offsetX, y: offsetY });
       setPosition({ x: adjustedX, y: adjustedY });
       setIsVisible(true);
@@ -83,7 +90,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   };
 
   const handleClick = (event: MouseEvent) => {
-    if (pinned || isResizing || dropdownIsOpen) return;
+    if (pinned || isResizing) return;
 
     const rect = getTriggerElementRect();
     const target = event.target as Node;
@@ -148,6 +155,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     }
   };
 
+  const handlePinChange = async () => {
+    await setStorageData((data) => ({
+      ...data,
+      pinned: !pinned,
+    }));
+    setPinned(!pinned);
+  };
+
+  const handleDraggableChange = async () => {
+    await setStorageData((data) => ({
+      ...data,
+      draggable: !isDraggable,
+    }));
+    setIsDraggable(!isDraggable);
+  };
+
   useEffect(() => {
     document.addEventListener('contextmenu', handleContextMenu);
     document.addEventListener('click', handleClick);
@@ -159,8 +182,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
   useEffect(() => {
     if (isVisible && !isResizing) {
-      const newX = draggedPosition.x + offset.x;
-      const newY = draggedPosition.y + offset.y;
+      const newX = (draggedPosition as Position).x + offset.x;
+      const newY = (draggedPosition as Position).y + offset.y;
       const adjustedPosition = adjustPositionWithinBounds(newX, newY);
       setPosition(adjustedPosition);
     }
@@ -176,8 +199,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     <div
       ref={menuRef}
       className={cn(
-        'absolute z-50 transition-opacity duration-200',
-        'flex flex-col gap-y-3 rounded-xl border border-gray-200 bg-white p-4 shadow-sm',
+        'absolute z-30 transition-opacity duration-200',
+        'flex flex-col gap-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm',
         'dark:border-none dark:bg-zinc-700 dark:shadow-md dark:shadow-zinc-800',
         isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
       )}
@@ -186,36 +209,52 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         !isResizing && setIsExpanded(new Array(roleNodes.length).fill(false))
       }
     >
-      <div className='flex justify-between'>
-        <button
-          className={cn(
-            'w-24 rounded-md border px-1 py-1 text-sm shadow-sm transition duration-200',
-            'hover:bg-zinc-100 active:bg-zinc-200',
-            'dark:bg-zinc-700 dark:hover:bg-zinc-800 dark:active:bg-zinc-900'
-          )}
+      <div className='flex items-center justify-between overflow-x-auto'>
+        <Button
+          variant='outline'
+          className='w-28 rounded-lg py-1 pr-2 dark:border-zinc-500 dark:bg-zinc-700'
+          size='none'
           onClick={() => {
             setSearchTerm('');
             setRole((prev) => (prev === 'user' ? 'assistant' : 'user'));
           }}
         >
+          <div className='scale-[0.65]'>
+            {role === 'user' ? <User /> : <Bot />}
+          </div>
+
           {capitalize(role)}
-        </button>
-        {/* <button
-          onClick={() => {
-            chrome.storage.sync.clear(function () {
-              if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError);
-              } else {
-                console.log('chrome.storage.sync data cleared.');
-              }
-            });
-          }}
-        >
-          Clear
-        </button> */}
-        <CheckboxGroup />
+        </Button>
+        {isResizing ? (
+          <Badge variant='outline'>
+            {Math.floor(size.width)}x{Math.floor(size.height)}
+          </Badge>
+        ) : (
+          <div className='flex items-center'>
+            <div className='flex w-14 scale-[0.65] justify-end gap-1'>
+              <div
+                title='Stay on top'
+                className={cn(!pinned && 'opacity-25', 'cursor-pointer')}
+                onClick={handlePinChange}
+              >
+                <Pin />
+              </div>
+              <div
+                title='Draggable'
+                className={cn(!isDraggable && 'opacity-25', 'cursor-pointer')}
+                onClick={handleDraggableChange}
+              >
+                <Hand />
+              </div>
+            </div>
+            <Separator
+              orientation='vertical'
+              className='h-4 w-[1px] bg-zinc-400 dark:bg-zinc-300'
+            />
+            <SettingsMenu />
+          </div>
+        )}
       </div>
-        <SettingsMenu />
       <SearchBox />
       {children}
     </div>

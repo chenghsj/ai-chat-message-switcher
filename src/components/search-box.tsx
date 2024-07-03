@@ -8,8 +8,8 @@ export function SearchBox({}: Props) {
   const { searchTerm, setSearchTerm } = useSearch();
 
   return (
-    <div className='mr-2 flex h-10 items-center rounded-lg border p-1 pr-4 focus-within:bg-gray-100 dark:focus-within:bg-zinc-900'>
-      <Search className='ml-2' />
+    <div className='mr-2 flex h-10 items-center rounded-lg border p-1 pr-4 focus-within:bg-gray-100 dark:text-zinc-50 dark:focus-within:bg-zinc-900'>
+      <Search className='ml-2 scale-95' />
       <input
         type='text'
         placeholder='Search...'

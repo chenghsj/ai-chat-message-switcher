@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { triggerId } from '@src/config/types';
 import { useTriggerType } from '@src/hooks/use-trigger-type';
 import { ChevronDown, ChevronUp, Dot } from 'lucide-react';
 import { useChatNode } from '../hooks/use-chat-node';
 import { useDraggable } from '../hooks/use-draggable';
 import { cn } from '../utils/cn';
-import { Button } from './button';
 import { Draggable } from './draggable';
+import { Button } from './ui/button';
 
 export const ControlPanel: React.FC = () => {
   const { setTriggerType } = useTriggerType();
@@ -53,22 +54,30 @@ export const ControlPanel: React.FC = () => {
   }, [clickNodeIndex]);
 
   return (
-    <Draggable
-      triggerId='grab-trigger'
-      // 36 is the width of the trigger element
-    >
+    <Draggable triggerId={triggerId.grab}>
       <div
         className={cn(
           'flex h-fit w-9 cursor-pointer flex-col items-center justify-evenly rounded-full border bg-white opacity-60 shadow-sm transition duration-200 hover:opacity-100',
           'dark:border-none dark:bg-zinc-700'
         )}
-        id='context-menu-trigger'
+        id={triggerId.open}
       >
-        <Button onClick={() => handleArrowClick('up')} disabled={disable.up}>
+        <Button
+          className={cn(
+            clickNodeIndex === 0 &&
+              'border-none opacity-40 dark:hover:bg-transparent'
+          )}
+          variant='panel'
+          size='none'
+          onClick={() => handleArrowClick('up')}
+          disabled={disable.up}
+        >
           <ChevronUp />
         </Button>
-        {isDraggable && <Dot className='cursor-grab' id='grab-trigger' />}
+        {isDraggable && <Dot className='cursor-grab' id={triggerId.grab} />}
         <Button
+          variant='panel'
+          size='none'
           onClick={() => handleArrowClick('down')}
           disabled={disable.down}
         >

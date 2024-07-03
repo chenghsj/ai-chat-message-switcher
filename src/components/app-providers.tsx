@@ -1,11 +1,11 @@
 import React from 'react';
+import { initialPosition, initialSize } from '@src/config/types';
 import { ChatNodeProvider } from '@src/hooks/use-chat-node';
 import { ContextMenuProvider } from '@src/hooks/use-context-menu';
 import { DraggableProvider } from '@src/hooks/use-draggable';
 import { SearchProvider } from '@src/hooks/use-search';
 import { SizeProvider } from '@src/hooks/use-size';
 import { TriggerTypeProvider } from '@src/hooks/use-trigger-type';
-import { DropdownProvider } from '@src/hooks/use-dropdown';
 
 // https://gist.github.com/phatnguyenuit/68122170e317d13e7148c7563be021b6
 interface Provider<TProps> {
@@ -41,11 +41,8 @@ function createProvider<TProps>(
 const providers = [
   createProvider(TriggerTypeProvider),
   createProvider(ChatNodeProvider),
-  createProvider(DraggableProvider, {
-    initialPosition: { x: `100% - ${36 + 20}px`, y: `50% - 60px` },
-  }),
-  createProvider(SizeProvider, { initialSize: { width: 400, height: 400 } }),
-  createProvider(DropdownProvider),
+  createProvider(DraggableProvider, { initialPosition }),
+  createProvider(SizeProvider, { initialSize }),
   createProvider(ContextMenuProvider),
   createProvider(SearchProvider),
 ];

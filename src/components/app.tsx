@@ -1,4 +1,5 @@
 import React from 'react';
+import { triggerId } from '@src/config/types';
 import { AppProvider } from './app-providers';
 import { ChatNodeList } from './chat-node-list';
 import { ContextMenu } from './context-menu';
@@ -10,7 +11,7 @@ const App: React.FC = () => {
     <AppProvider>
       <ControlPanel />
       <Resizable>
-        <ContextMenu triggerId='context-menu-trigger'>
+        <ContextMenu triggerId={triggerId.open}>
           <ChatNodeList role='user' />
         </ContextMenu>
       </Resizable>

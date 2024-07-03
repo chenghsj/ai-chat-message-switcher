@@ -6,6 +6,7 @@ import {
 } from 'react-resizable';
 import 'react-resizable/css/styles.css';
 import { setStorageData } from '@src/config/storage';
+import { gap } from '@src/config/types';
 import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useSize } from '@src/hooks/use-size';
 import { cn } from '@src/utils/cn';
@@ -58,7 +59,6 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     const { width, height } = data.size;
     const screenWidth = window.innerWidth;
     const screenHeight = window.innerHeight;
-    const gap = 5;
     let newX = position.x;
     let newY = position.y;
 
@@ -83,7 +83,7 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     const constrainedHeight = Math.min(height, screenHeight - newY - gap);
 
     setSize({ width: constrainedWidth, height: constrainedHeight });
-    setOffset({ ...offset, x: -constrainedWidth - gap })
+    setOffset({ ...offset, x: -constrainedWidth - gap });
     setPosition({ x: newX, y: newY });
   };
 
