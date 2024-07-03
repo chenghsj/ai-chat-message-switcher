@@ -8,6 +8,8 @@ import { useDraggable } from '../hooks/use-draggable';
 import { useSearch } from '../hooks/use-search';
 import { CheckboxGroup } from './check-box-group';
 import { SearchBox } from './search-box';
+import { SettingsMenu } from './settings-menu';
+import { useDropdown } from '@src/hooks/use-dropdown';
 
 type ContextMenuProps = {
   children?: ReactNode;
@@ -30,6 +32,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
     setOffset,
     pinned,
   } = useContextMenu();
+  const {open: dropdownIsOpen} = useDropdown();
   const { setSearchTerm } = useSearch();
   const { position: draggedPosition } = useDraggable();
   const { setIsExpanded, nodes: roleNodes } = useChatNode();
@@ -80,7 +83,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   };
 
   const handleClick = (event: MouseEvent) => {
-    if (pinned || isResizing) return;
+    if (pinned || isResizing || dropdownIsOpen) return;
 
     const rect = getTriggerElementRect();
     const target = event.target as Node;
@@ -197,7 +200,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
         >
           {capitalize(role)}
         </button>
-        <button
+        {/* <button
           onClick={() => {
             chrome.storage.sync.clear(function () {
               if (chrome.runtime.lastError) {
@@ -209,9 +212,10 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           }}
         >
           Clear
-        </button>
+        </button> */}
         <CheckboxGroup />
       </div>
+        <SettingsMenu />
       <SearchBox />
       {children}
     </div>

@@ -62,7 +62,7 @@ export const ControlPanel: React.FC = () => {
           'flex h-fit w-9 cursor-pointer flex-col items-center justify-evenly rounded-full border bg-white opacity-60 shadow-sm transition duration-200 hover:opacity-100',
           'dark:border-none dark:bg-zinc-700'
         )}
-        id='trigger'
+        id='context-menu-trigger'
       >
         <Button onClick={() => handleArrowClick('up')} disabled={disable.up}>
           <ChevronUp />

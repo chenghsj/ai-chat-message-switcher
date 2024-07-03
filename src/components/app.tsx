@@ -10,7 +10,7 @@ const App: React.FC = () => {
     <AppProvider>
       <ControlPanel />
       <Resizable>
-        <ContextMenu triggerId='trigger'>
+        <ContextMenu triggerId='context-menu-trigger'>
           <ChatNodeList role='user' />
         </ContextMenu>
       </Resizable>

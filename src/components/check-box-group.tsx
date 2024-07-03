@@ -2,13 +2,14 @@ import { setStorageData } from '@src/config/storage';
 import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useDraggable } from '@src/hooks/use-draggable';
 import { cn } from '@src/utils/cn';
+import { Label } from './ui/label';
+import { Switch } from './ui/switch';
 
 export function CheckboxGroup() {
   const { pinned, setPinned } = useContextMenu();
   const {
     isDraggable,
     setIsDraggable,
-    position: draggedPosition,
   } = useDraggable();
   const inputClassName = cn(
     'appearance-none rounded-sm outline-none checked:text-zinc-600',
@@ -17,7 +18,18 @@ export function CheckboxGroup() {
 
   return (
     <div className='mr-2 flex flex-wrap items-center justify-end gap-x-2 gap-y-1'>
-      <div className='flex items-center gap-1'>
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="pin-menu">Stay on top</Label>
+          <Switch id="pin-menu" 
+          onClick={async () => {
+            await setStorageData((data) => ({
+              ...data,
+              pinned: !pinned,
+            }));
+            setPinned(!pinned);
+          }}/>
+        </div>
+      {/* <div className='flex items-center gap-1'>
         <label htmlFor='pin-menu' className='text-xs'>
           Stay on top
         </label>
@@ -34,7 +46,7 @@ export function CheckboxGroup() {
             setPinned(!pinned);
           }}
         />
-      </div>
+      </div> */}
       <div className='flex items-center gap-1'>
         <label htmlFor='panel-graggable' className='text-xs'>
           Draggable

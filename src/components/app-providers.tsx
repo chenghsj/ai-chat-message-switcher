@@ -5,6 +5,7 @@ import { DraggableProvider } from '@src/hooks/use-draggable';
 import { SearchProvider } from '@src/hooks/use-search';
 import { SizeProvider } from '@src/hooks/use-size';
 import { TriggerTypeProvider } from '@src/hooks/use-trigger-type';
+import { DropdownProvider } from '@src/hooks/use-dropdown';
 
 // https://gist.github.com/phatnguyenuit/68122170e317d13e7148c7563be021b6
 interface Provider<TProps> {
@@ -44,6 +45,7 @@ const providers = [
     initialPosition: { x: `100% - ${36 + 20}px`, y: `50% - 60px` },
   }),
   createProvider(SizeProvider, { initialSize: { width: 400, height: 400 } }),
+  createProvider(DropdownProvider),
   createProvider(ContextMenuProvider),
   createProvider(SearchProvider),
 ];
