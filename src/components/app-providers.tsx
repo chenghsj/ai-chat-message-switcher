@@ -1,11 +1,15 @@
 import React from 'react';
-import { initialPosition, initialSize } from '@src/config/types';
+import {
+  initialContextMenuPosition,
+  initialControlPanelPosition,
+  initialSize,
+} from '@src/config/types';
 import { ChatNodeProvider } from '@src/hooks/use-chat-node';
-import { ContextMenuProvider } from '@src/hooks/use-context-menu';
-import { DraggableProvider } from '@src/hooks/use-draggable';
-import { SearchProvider } from '@src/hooks/use-search';
-import { SizeProvider } from '@src/hooks/use-size';
-import { TriggerTypeProvider } from '@src/hooks/use-trigger-type';
+import { ContextMenuProvider } from '@src/hooks/use-context-menu-context';
+import { DraggableProvider } from '@src/hooks/use-draggable-context';
+import { SearchProvider } from '@src/hooks/use-search-context';
+import { SizeProvider } from '@src/hooks/use-size-context';
+import { TriggerTypeProvider } from '@src/hooks/use-trigger-type-context';
 
 // https://gist.github.com/phatnguyenuit/68122170e317d13e7148c7563be021b6
 interface Provider<TProps> {
@@ -41,9 +45,13 @@ function createProvider<TProps>(
 const providers = [
   createProvider(TriggerTypeProvider),
   createProvider(ChatNodeProvider),
-  createProvider(DraggableProvider, { initialPosition }),
+  createProvider(DraggableProvider, {
+    initialPosition: initialControlPanelPosition,
+  }),
   createProvider(SizeProvider, { initialSize }),
-  createProvider(ContextMenuProvider),
+  createProvider(ContextMenuProvider, {
+    initialPosition: initialContextMenuPosition,
+  }),
   createProvider(SearchProvider),
 ];
 

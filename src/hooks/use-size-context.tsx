@@ -53,10 +53,10 @@ export const SizeProvider: React.FC<SizeProviderProps> = ({
   );
 };
 
-export const useSize = (): SizeContextType => {
+export const useSizeContext = (): SizeContextType => {
   const context = useContext(SizeContext);
   if (context === undefined) {
-    throw new Error('useSize must be used within a SizeProvider');
+    throw new Error('useSizeContext must be used within a SizeProvider');
   }
   return context;
 };

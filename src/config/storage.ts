@@ -1,4 +1,8 @@
-import { Position, initialSize, parsedInitialPosition } from './types';
+import {
+  Position,
+  initialSize,
+  parsedInitialControlPanelPosition,
+} from './types';
 
 // Define the type for the storage object
 type StorageData = {
@@ -51,14 +55,16 @@ export function setStorageData(
 
 export function resetToDefault(): Promise<void> {
   return new Promise((resolve, reject) => {
+    const defaultData: StorageData[typeof DEFAULT_KEY] = {
+      draggable: true,
+      draggedPosition: parsedInitialControlPanelPosition,
+      size: initialSize,
+      pinned: false,
+    };
+
     chrome.storage.sync.set(
       {
-        [DEFAULT_KEY]: {
-          draggable: true,
-          draggedPosition: parsedInitialPosition,
-          size: initialSize,
-          pinned: false,
-        },
+        [DEFAULT_KEY]: defaultData,
       },
       () => {
         if (chrome.runtime.lastError) {

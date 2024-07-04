@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react';
 import { getStorageData } from '@src/config/storage';
-import { Position, parsedInitialPosition } from '@src/config/types';
+import { Position, parsedInitialControlPanelPosition } from '@src/config/types';
 
 interface InitialPosition {
   x: string | number;
@@ -30,12 +30,14 @@ export const DraggableProvider: React.FC<{
   initialPosition: InitialPosition;
 }> = ({ initialPosition, children }) => {
   const [isDraggable, setIsDraggable] = useState(true);
-  const [position, setPosition] = useState<Position>(parsedInitialPosition);
+  const [position, setPosition] = useState<Position>(
+    parsedInitialControlPanelPosition
+  );
 
   useEffect(() => {
     const initializePosition = async () => {
       const data = await getStorageData();
-      setPosition(data?.draggedPosition ?? parsedInitialPosition);
+      setPosition(data?.draggedPosition ?? parsedInitialControlPanelPosition);
       setIsDraggable(data?.draggable ?? true);
     };
 
@@ -57,10 +59,12 @@ export const DraggableProvider: React.FC<{
   );
 };
 
-export const useDraggable = () => {
+export const useDraggableContext = () => {
   const context = useContext(DraggableContext);
   if (!context) {
-    throw new Error('useDraggable must be used within a DraggableProvider');
+    throw new Error(
+      'useDraggableContext must be used within a DraggableProvider'
+    );
   }
   return context;
 };

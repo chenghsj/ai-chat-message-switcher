@@ -1,24 +1,28 @@
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@radix-ui/react-hover-card';
 import { resetToDefault, setStorageData } from '@src/config/storage';
-import { initialSize, parsedInitialPosition } from '@src/config/types';
-import { useContextMenu } from '@src/hooks/use-context-menu';
-import { useDraggable } from '@src/hooks/use-draggable';
-import { useSize } from '@src/hooks/use-size';
+import {
+  initialContextMenuPosition,
+  initialSize,
+  parsedInitialControlPanelPosition,
+} from '@src/config/types';
+import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
+import { useDraggableContext } from '@src/hooks/use-draggable-context';
+import { useSizeContext } from '@src/hooks/use-size-context';
 import { cn } from '@src/utils/cn';
 import { Hand, Pin } from 'lucide-react';
 import { Button } from './ui/button';
+import { HoverCard, HoverCardContent, HoverCardTrigger } from './ui/hover-card';
 import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 
 export function SettingsMenu() {
-  const { setSize } = useSize();
-  const { setPosition } = useDraggable();
-  const { isDraggable, setIsDraggable } = useDraggable();
-  const { pinned, setPinned, setIsVisible } = useContextMenu();
+  const { setSize } = useSizeContext();
+  const { isDraggable, setIsDraggable, setPosition } = useDraggableContext();
+  const {
+    pinned,
+    setPinned,
+    setIsVisible,
+    setPosition: setContextMenuPosition,
+  } = useContextMenuContext();
 
   const handlePinChange = async () => {
     await setStorageData((data) => ({
@@ -42,8 +46,9 @@ export function SettingsMenu() {
     setIsDraggable(true);
     setPinned(false);
     setSize(initialSize);
-    setPosition(parsedInitialPosition);
+    setPosition(parsedInitialControlPanelPosition);
     setIsVisible(false);
+    setContextMenuPosition(initialContextMenuPosition);
   };
 
   return (
@@ -53,13 +58,7 @@ export function SettingsMenu() {
           Settings
         </Button>
       </HoverCardTrigger>
-      <HoverCardContent
-        className={cn(
-          'z-50 mt-1 grid gap-3 rounded-lg border border-zinc-200 bg-white px-3 py-4 text-zinc-950',
-          'shadow-sm dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-50 dark:shadow-zinc-900',
-          '-translate-x-14'
-        )}
-      >
+      <HoverCardContent className={cn('grid w-fit gap-3')}>
         <div className='flex items-center justify-between gap-3'>
           <div className='flex'>
             <Pin className='mr-2 h-4 w-4' />

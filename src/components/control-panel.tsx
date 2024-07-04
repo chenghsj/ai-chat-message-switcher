@@ -1,24 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { triggerId } from '@src/config/types';
-import { useTriggerType } from '@src/hooks/use-trigger-type';
+import { userTriggerTypeContext } from '@src/hooks/use-trigger-type-context';
 import { ChevronDown, ChevronUp, Dot } from 'lucide-react';
 import { useChatNode } from '../hooks/use-chat-node';
-import { useDraggable } from '../hooks/use-draggable';
+import { useDraggableContext } from '../hooks/use-draggable-context';
 import { cn } from '../utils/cn';
 import { Draggable } from './draggable';
 import { Button } from './ui/button';
 
 export const ControlPanel: React.FC = () => {
-  const { setTriggerType } = useTriggerType();
+  const { setTriggerType } = userTriggerTypeContext();
   const { clickNodeIndex, setClickNodeIndex, nodes, role } = useChatNode();
-  const { isDraggable } = useDraggable();
+  const { isDraggable } = useDraggableContext();
   const [disable, setDisable] = useState({
     up: false,
     down: false,
   });
 
   const updateDisableState = (index: number) => {
-    // Fix: the first node should disable the button
     setDisable({
       up: index === -1,
       down: index === nodes.length - 1,
@@ -54,13 +53,13 @@ export const ControlPanel: React.FC = () => {
   }, [clickNodeIndex]);
 
   return (
-    <Draggable triggerId={triggerId.grab}>
+    <Draggable triggerId={triggerId.grabContextMenu}>
       <div
         className={cn(
           'flex h-fit w-9 cursor-pointer flex-col items-center justify-evenly rounded-full border bg-white opacity-60 shadow-sm transition duration-200 hover:opacity-100',
           'dark:border-none dark:bg-zinc-700'
         )}
-        id={triggerId.open}
+        id={triggerId.openContextMenu}
       >
         <Button
           className={cn(
@@ -74,7 +73,9 @@ export const ControlPanel: React.FC = () => {
         >
           <ChevronUp />
         </Button>
-        {isDraggable && <Dot className='cursor-grab' id={triggerId.grab} />}
+        {isDraggable && (
+          <Dot className='cursor-grab' id={triggerId.grabContextMenu} />
+        )}
         <Button
           variant='panel'
           size='none'

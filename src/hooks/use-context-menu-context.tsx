@@ -29,13 +29,15 @@ const ContextMenuContext = createContext<ContextMenuContextType | undefined>(
 
 interface ContextMenuProviderProps {
   children: ReactNode;
+  initialPosition: Position;
 }
 
 export const ContextMenuProvider: React.FC<ContextMenuProviderProps> = ({
   children,
+  initialPosition,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+  const [position, setPosition] = useState(initialPosition);
   const [controlPanelSide, setControlPanelSide] =
     useState<ControlPanelSide>('right');
   // the offset is used to adjust the position of the context menu relative to the trigger element
@@ -74,10 +76,12 @@ export const ContextMenuProvider: React.FC<ContextMenuProviderProps> = ({
   );
 };
 
-export const useContextMenu = () => {
+export const useContextMenuContext = () => {
   const context = useContext(ContextMenuContext);
   if (context === undefined) {
-    throw new Error('useContextMenu must be used within a ContextMenuProvider');
+    throw new Error(
+      'useContextMenuContext must be used within a ContextMenuProvider'
+    );
   }
   return context;
 };

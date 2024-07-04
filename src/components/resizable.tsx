@@ -1,4 +1,4 @@
-import React, { FC, ReactNode, useEffect, useState } from 'react';
+import React, { FC, ReactNode, useCallback, useEffect, useState } from 'react';
 import {
   Resizable as ResizableComponent,
   ResizeCallbackData,
@@ -7,8 +7,8 @@ import {
 import 'react-resizable/css/styles.css';
 import { setStorageData } from '@src/config/storage';
 import { gap } from '@src/config/types';
-import { useContextMenu } from '@src/hooks/use-context-menu';
-import { useSize } from '@src/hooks/use-size';
+import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
+import { useSizeContext } from '@src/hooks/use-size-context';
 import { cn } from '@src/utils/cn';
 
 interface ResizableComponentProps {
@@ -32,7 +32,7 @@ const getHandleClasses = (resizeHandle: ResizeHandle) => {
 };
 
 export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
-  const { size, setSize, setIsResizing } = useSize();
+  const { size: contextMenuSize, setSize, setIsResizing } = useSizeContext();
   const {
     position,
     setPosition,
@@ -40,7 +40,7 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     controlPanelSide,
     setOffset,
     offset,
-  } = useContextMenu();
+  } = useContextMenuContext();
 
   const [handles, setHandles] = useState<ResizeHandle[]>(['s', 'w', 'n']);
 
@@ -52,56 +52,66 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     );
   }, [controlPanelSide]);
 
-  const handleResize = (
-    event: React.SyntheticEvent<Element, Event>,
-    data: ResizeCallbackData
-  ) => {
-    const { width, height } = data.size;
-    const screenWidth = window.innerWidth;
-    const screenHeight = window.innerHeight;
-    let newX = position.x;
-    let newY = position.y;
+  const handleResize = useCallback(
+    (event: React.SyntheticEvent<Element, Event>, data: ResizeCallbackData) => {
+      const { width, height } = data.size;
 
-    switch (data.handle) {
-      case 'n':
-      case 'ne':
-        newY = Math.max(position.y + (size.height - height), gap);
-        break;
-      case 'w':
-      case 'sw':
-        newX = Math.max(position.x + (size.width - width), gap);
-        break;
-      case 'nw':
-        newY = Math.max(position.y + (size.height - height), gap);
-        newX = Math.max(position.x + (size.width - width), gap);
-        break;
-      default:
-        break;
-    }
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
 
-    const constrainedWidth = Math.min(width, screenWidth - newX - gap);
-    const constrainedHeight = Math.min(height, screenHeight - newY - gap);
+      const isNorth = ['n', 'ne', 'nw'].includes(data.handle);
+      const isWest = ['w', 'sw', 'nw'].includes(data.handle);
 
-    setSize({ width: constrainedWidth, height: constrainedHeight });
-    setOffset({ ...offset, x: -constrainedWidth - gap });
-    setPosition({ x: newX, y: newY });
-  };
+      const newX = isWest
+        ? Math.max(position.x + (contextMenuSize.width - width), gap)
+        : position.x;
+      let newY = isNorth
+        ? Math.max(position.y + (contextMenuSize.height - height), gap)
+        : position.y;
 
-  const handleResizeStart = () => {
+      const constrainedWidth = Math.min(width, screenWidth - newX - gap);
+      let constrainedHeight = Math.min(height, screenHeight - newY - gap);
+
+      if (isNorth) {
+        const clientY = (event as unknown as MouseEvent).clientY;
+        if (clientY - gap < 0) newY = gap;
+        constrainedHeight = Math.min(
+          constrainedHeight + (position.y - clientY + gap),
+          screenHeight - 2 * gap
+        );
+      }
+
+      setSize({
+        width: constrainedWidth,
+        height: constrainedHeight,
+      });
+      setOffset((prevOffset) => ({
+        ...prevOffset,
+        x: -constrainedWidth - gap,
+      }));
+      setPosition({ x: newX, y: newY });
+    },
+    [contextMenuSize, position, setOffset, setPosition, setSize]
+  );
+
+  const handleResizeStart = useCallback(() => {
     setIsResizing(true);
-  };
+  }, [setIsResizing]);
 
-  const handleResizeStop = async (
-    event: React.SyntheticEvent<Element, Event>,
-    data: ResizeCallbackData
-  ) => {
-    await setStorageData((storageData) => ({
-      ...storageData,
-      size: data.size,
-    }));
-
-    setIsResizing(false);
-  };
+  const handleResizeStop = useCallback(
+    async (
+      event: React.SyntheticEvent<Element, Event>,
+      data: ResizeCallbackData
+    ) => {
+      await setStorageData((storageData) => ({
+        ...storageData,
+        size: data.size,
+        offset,
+      }));
+      setIsResizing(false);
+    },
+    [offset, setIsResizing]
+  );
 
   return (
     <div
@@ -112,8 +122,8 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
       style={{ top: position.y, left: position.x }}
     >
       <ResizableComponent
-        width={size.width}
-        height={size.height}
+        width={contextMenuSize.width}
+        height={contextMenuSize.height}
         onResize={handleResize}
         resizeHandles={handles}
         handle={(resizeHandle, ref) => (
@@ -128,5 +138,3 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     </div>
   );
 };
-
-// TODO: show size info while resizing

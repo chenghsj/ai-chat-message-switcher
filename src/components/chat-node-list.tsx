@@ -1,28 +1,28 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { useContextMenu } from '@src/hooks/use-context-menu';
-import { useSize } from '@src/hooks/use-size';
-import { useTriggerType } from '@src/hooks/use-trigger-type';
+import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
+import { useSizeContext } from '@src/hooks/use-size-context';
+import { userTriggerTypeContext } from '@src/hooks/use-trigger-type-context';
 import { cn } from '@src/utils/cn';
 import { findClosestDivIndex } from '@src/utils/find-closest-div-index';
 import { findClosestScrollableElement } from '@src/utils/find-closest-scrollable-element';
 import { throttle } from '@src/utils/throttle';
 import { ChevronDown } from 'lucide-react';
-import { ChatNodeRoleType, useChatNode } from '../hooks/use-chat-node';
-import { useSearch } from '../hooks/use-search';
+import { useChatNode } from '../hooks/use-chat-node';
+import { useSearchContext } from '../hooks/use-search-context';
 
 interface ChatNodeProps {
-  role?: ChatNodeRoleType;
+  children?: React.ReactNode;
 }
 
 const chatlistItemHeight = 40;
 
 export const ChatNodeList: React.FC<ChatNodeProps> = () => {
   const listRef = useRef<HTMLDivElement | null>(null);
-  const { size: contextMenuSize } = useSize();
-  const { isVisible: isContextMenuVisible } = useContextMenu();
-  const { triggerType, setTriggerType } = useTriggerType();
+  const { size: contextMenuSize } = useSizeContext();
+  const { isVisible: isContextMenuVisible } = useContextMenuContext();
+  const { triggerType, setTriggerType } = userTriggerTypeContext();
   const { isExpanded, setIsExpanded } = useChatNode();
-  const { searchTerm } = useSearch();
+  const { searchTerm } = useSearchContext();
   const {
     clickNodeIndex,
     setClickNodeIndex,
