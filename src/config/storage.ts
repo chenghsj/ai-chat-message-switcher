@@ -1,5 +1,6 @@
 import {
   Position,
+  initialOpacity,
   initialSize,
   parsedInitialControlPanelPosition,
 } from './types';
@@ -11,6 +12,7 @@ type StorageData = {
     draggedPosition?: Position;
     size?: { width: number; height: number };
     pinned?: boolean;
+    opacity?: number;
   };
 };
 
@@ -60,6 +62,7 @@ export function resetToDefault(): Promise<void> {
       draggedPosition: parsedInitialControlPanelPosition,
       size: initialSize,
       pinned: false,
+      opacity: initialOpacity,
     };
 
     chrome.storage.sync.set(

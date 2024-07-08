@@ -5,6 +5,7 @@ import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
 import { useDraggableContext } from '@src/hooks/use-draggable-context';
 import { useSearchContext } from '@src/hooks/use-search-context';
 import { useSizeContext } from '@src/hooks/use-size-context';
+import { useDraggableLabelValueContext } from './use-draggable-label-value-context';
 
 export const useContextMenuHandlers = (triggerId: string) => {
   const { size, isResizing } = useSizeContext();
@@ -25,6 +26,7 @@ export const useContextMenuHandlers = (triggerId: string) => {
     isDraggable,
     setIsDraggable,
   } = useDraggableContext();
+  const { opacity } = useDraggableLabelValueContext();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const getTriggerElementRect = () => {
@@ -152,6 +154,29 @@ export const useContextMenuHandlers = (triggerId: string) => {
     }));
     setIsDraggable(!isDraggable);
   };
+
+  useEffect(() => {
+    const handleMouseEnter = () => {
+      menuRef.current!.style.opacity = '1';
+    };
+    const handleMouseLeave = () => {
+      if (isResizing) {
+        menuRef.current!.style.opacity = '1';
+      } else {
+        menuRef.current!.style.opacity = `${opacity}`;
+      }
+    };
+    if (isVisible && menuRef.current) {
+      menuRef.current.addEventListener('mouseenter', handleMouseEnter);
+      menuRef.current.addEventListener('mouseleave', handleMouseLeave);
+    }
+    return () => {
+      if (menuRef.current) {
+        menuRef.current.removeEventListener('mouseenter', handleMouseEnter);
+        menuRef.current.removeEventListener('mouseleave', handleMouseLeave);
+      }
+    };
+  }, [opacity, isVisible, isResizing]);
 
   useEffect(() => {
     document.addEventListener('contextmenu', handleContextMenu);

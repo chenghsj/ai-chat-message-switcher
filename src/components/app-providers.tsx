@@ -2,11 +2,13 @@ import React from 'react';
 import {
   initialContextMenuPosition,
   initialControlPanelPosition,
+  initialOpacity,
   initialSize,
 } from '@src/config/types';
 import { ChatNodeProvider } from '@src/hooks/use-chat-node';
 import { ContextMenuProvider } from '@src/hooks/use-context-menu-context';
 import { DraggableProvider } from '@src/hooks/use-draggable-context';
+import { DraggableLabelValueProvider } from '@src/hooks/use-draggable-label-value-context';
 import { SearchProvider } from '@src/hooks/use-search-context';
 import { SizeProvider } from '@src/hooks/use-size-context';
 import { TriggerTypeProvider } from '@src/hooks/use-trigger-type-context';
@@ -52,6 +54,7 @@ const providers = [
   createProvider(ContextMenuProvider, {
     initialPosition: initialContextMenuPosition,
   }),
+  createProvider(DraggableLabelValueProvider, { initialOpacity }),
   createProvider(SearchProvider),
 ];
 

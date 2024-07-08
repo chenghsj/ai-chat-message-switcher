@@ -1,10 +1,11 @@
 import React, { ReactNode } from 'react';
 import { Separator } from '@radix-ui/react-separator';
-import { triggerId } from '@src/config/types';
+import { contextMenuId, triggerId } from '@src/config/types';
 import { useChatNode } from '@src/hooks/use-chat-node';
 import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
 import { useContextMenuHandlers } from '@src/hooks/use-context-menu-handlers';
 import { useDraggableContext } from '@src/hooks/use-draggable-context';
+import { useDraggableLabelValueContext } from '@src/hooks/use-draggable-label-value-context';
 import { useSearchContext } from '@src/hooks/use-search-context';
 import { useSizeContext } from '@src/hooks/use-size-context';
 import { capitalize } from '@src/utils/capitalize';
@@ -24,6 +25,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
     size: { width, height },
     isResizing,
   } = useSizeContext();
+  const { opacity } = useDraggableLabelValueContext();
   const { role, setRole, setIsExpanded, nodes: roleNodes } = useChatNode();
   const { isDraggable } = useDraggableContext();
   const { isVisible, pinned } = useContextMenuContext();
@@ -33,14 +35,21 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
 
   return (
     <div
+      id={contextMenuId}
       ref={menuRef}
       className={cn(
         'absolute z-30 transition-opacity duration-200',
         'flex flex-col gap-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm',
         'overflow-hidden dark:border-none dark:bg-zinc-700 dark:shadow-md dark:shadow-zinc-800',
-        isVisible ? 'opacity-100' : 'pointer-events-none opacity-0'
+        isVisible ? `visible` : 'pointer-events-none invisible'
       )}
-      style={{ top: 0, left: 0, width: `${width}px`, height: `${height}px` }}
+      style={{
+        top: 0,
+        left: 0,
+        width: `${width}px`,
+        height: `${height}px`,
+        opacity,
+      }}
       onClick={() =>
         !isResizing && setIsExpanded(new Array(roleNodes.length).fill(false))
       }

@@ -5,6 +5,8 @@ export const triggerId = {
   openContextMenu: 'context-menu-open-trigger',
 } as const;
 
+export const contextMenuId = 'chatgpt-message-switcher-context-menu';
+
 export interface Position {
   x: number;
   y: number;
@@ -25,3 +27,5 @@ export const initialContextMenuPosition = { x: 0, y: 0 };
 export const initialSize = { width: 400, height: 400 };
 // gap between the context menu and the trigger element, and the context menu and the edge of the screen
 export const gap = 5;
+
+export const initialOpacity = 1;
