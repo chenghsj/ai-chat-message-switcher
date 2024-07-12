@@ -76,7 +76,7 @@ export const Draggable: React.FC<DraggableProps> = ({
 
   const handleMouseDown = useCallback(
     (event: React.MouseEvent) => {
-      if (!isDraggable) return;
+      if (event.button !== 0 || !isDraggable) return;
 
       const initialMouseX = event.clientX;
       const initialMouseY = event.clientY;

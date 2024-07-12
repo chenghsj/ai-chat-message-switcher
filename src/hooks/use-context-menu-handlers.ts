@@ -35,7 +35,6 @@ export const useContextMenuHandlers = (triggerId: string) => {
   };
 
   const handleContextMenu = (event: MouseEvent) => {
-    event.preventDefault();
     if (pinned) return;
 
     const rect = getTriggerElementRect();

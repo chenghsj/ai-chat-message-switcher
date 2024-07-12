@@ -137,7 +137,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           style={{
             maxHeight: contextMenuSize.height / 2,
             height: isExpanded[index]
-              ? calculateContentHeight(index).invisible
+              ? calculateContentHeight(index).invisible + 10
               : chatlistItemHeight,
           }}
         >
@@ -147,7 +147,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
               'invisible absolute flex w-full justify-between border'
             )}
           >
-            <div className={cn('py-2 pl-3')} title={node.textContent || ''}>
+            <div className={cn('py-2 pl-3')}>
               {node.textContent || ''}
             </div>
             <div className='h-10 w-8'></div>
@@ -159,6 +159,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
               'flex flex-1 justify-between overflow-y-auto py-2 pl-3'
             )}
             onClick={() => {
+              if (isExpanded[index]) return;
               setTriggerType('context-menu-click');
               scrollToNode(node, index, role === 'user' ? 'center' : 'start');
             }}
@@ -167,10 +168,15 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
               className={cn(
                 'w-full text-ellipsis whitespace-nowrap pr-1 text-sm transition',
                 isExpanded[index]
-                  ? 'overflow-y-auto whitespace-pre-wrap'
+                  ? 'overflow-y-auto whitespace-pre-wrap select-text cursor-auto'
                   : 'overflow-hidden whitespace-nowrap'
               )}
-              title={node.textContent || ''}
+              title={isExpanded[index] ? '' : (node.textContent ?? '')}
+              onClick={(e) => {
+                if (isExpanded[index]) {
+                  e.stopPropagation()
+                }
+              }}
             >
               {node.textContent || ''}
             </div>
