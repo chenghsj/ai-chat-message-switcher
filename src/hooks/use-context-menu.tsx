@@ -52,6 +52,9 @@ export const ContextMenuProvider: React.FC<ContextMenuProviderProps> = ({
       if (data?.pinned) {
         setIsVisible(true);
       }
+      if (data?.offset?.x || data?.offset?.y) {
+        setOffset({ x: data.offset.x ?? 0, y: data.offset.y ?? 0 });
+      }
       setPinned(data?.pinned ?? false);
     });
   }, []);
@@ -76,11 +79,11 @@ export const ContextMenuProvider: React.FC<ContextMenuProviderProps> = ({
   );
 };
 
-export const useContextMenuContext = () => {
+export const useContextMenu = () => {
   const context = useContext(ContextMenuContext);
   if (context === undefined) {
     throw new Error(
-      'useContextMenuContext must be used within a ContextMenuProvider'
+      'useContextMenu must be used within a ContextMenuProvider'
     );
   }
   return context;

@@ -1,11 +1,11 @@
 import React from 'react';
 import { Search } from 'lucide-react';
-import { useSearchContext } from '../hooks/use-search-context';
+import { useSearch } from '../hooks/use-search';
 
 type Props = {};
 
-export function SearchBox({}: Props) {
-  const { searchTerm, setSearchTerm } = useSearchContext();
+export function SearchBox({ }: Props) {
+  const { searchTerm, setSearchTerm } = useSearch();
 
   return (
     <div className='mr-2 flex h-10 items-center rounded-lg border p-1 pr-4 focus-within:bg-gray-100 dark:text-zinc-50 dark:focus-within:bg-zinc-900'>

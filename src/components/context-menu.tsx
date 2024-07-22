@@ -1,13 +1,12 @@
 import React, { ReactNode } from 'react';
-import { Separator } from '@radix-ui/react-separator';
 import { contextMenuId, triggerId } from '@src/config/types';
 import { useChatNode } from '@src/hooks/use-chat-node';
-import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
+import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useContextMenuHandlers } from '@src/hooks/use-context-menu-handlers';
-import { useDraggableContext } from '@src/hooks/use-draggable-context';
-import { useDraggableLabelValueContext } from '@src/hooks/use-draggable-label-value-context';
-import { useSearchContext } from '@src/hooks/use-search-context';
-import { useSizeContext } from '@src/hooks/use-size-context';
+import { useDraggable } from '@src/hooks/use-draggable';
+import { useDraggableLabel } from '@src/hooks/use-draggable-label';
+import { useSearch } from '@src/hooks/use-search';
+import { useSize } from '@src/hooks/use-size';
 import { capitalize } from '@src/utils/capitalize';
 import { cn } from '@src/utils/cn';
 import { Bot, Hand, Pin, User } from 'lucide-react';
@@ -15,6 +14,7 @@ import { SearchBox } from './search-box';
 import { SettingsMenu } from './settings-menu';
 import { Badge } from './ui/badge';
 import { Button } from './ui/button';
+import { Separator } from './ui/separator';
 
 type ContextMenuProps = {
   children?: ReactNode;
@@ -24,12 +24,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
   const {
     size: { width, height },
     isResizing,
-  } = useSizeContext();
-  const { opacity } = useDraggableLabelValueContext();
+  } = useSize();
+  const { opacity } = useDraggableLabel();
   const { role, setRole, setIsExpanded, nodes: roleNodes } = useChatNode();
-  const { isDraggable } = useDraggableContext();
-  const { isVisible, pinned } = useContextMenuContext();
-  const { setSearchTerm } = useSearchContext();
+  const { isDraggable } = useDraggable();
+  const { isVisible, pinned } = useContextMenu();
+  const { setSearchTerm } = useSearch();
   const { menuRef, handlePinChange, handleDraggableChange } =
     useContextMenuHandlers(triggerId.openContextMenu);
 

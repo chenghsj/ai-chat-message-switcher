@@ -7,8 +7,8 @@ import {
 import 'react-resizable/css/styles.css';
 import { setStorageData } from '@src/config/storage';
 import { gap } from '@src/config/types';
-import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
-import { useSizeContext } from '@src/hooks/use-size-context';
+import { useContextMenu } from '@src/hooks/use-context-menu';
+import { useSize } from '@src/hooks/use-size';
 import { cn } from '@src/utils/cn';
 
 interface ResizableComponentProps {
@@ -32,7 +32,7 @@ const getHandleClasses = (resizeHandle: ResizeHandle) => {
 };
 
 export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
-  const { size: contextMenuSize, setSize, setIsResizing } = useSizeContext();
+  const { size: contextMenuSize, setSize, setIsResizing } = useSize();
   const {
     position,
     setPosition,
@@ -40,7 +40,7 @@ export const Resizable: FC<ResizableComponentProps> = ({ children }) => {
     controlPanelSide,
     setOffset,
     offset,
-  } = useContextMenuContext();
+  } = useContextMenu();
 
   const [handles, setHandles] = useState<ResizeHandle[]>(['s', 'w', 'n']);
 

@@ -1,14 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { setStorageData } from '@src/config/storage';
 import { gap } from '@src/config/types';
-import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
-import { useDraggableContext } from '@src/hooks/use-draggable-context';
-import { useSearchContext } from '@src/hooks/use-search-context';
-import { useSizeContext } from '@src/hooks/use-size-context';
-import { useDraggableLabelValueContext } from './use-draggable-label-value-context';
+import { useContextMenu } from '@src/hooks/use-context-menu';
+import { useDraggable } from '@src/hooks/use-draggable';
+import { useSearch } from '@src/hooks/use-search';
+import { useSize } from '@src/hooks/use-size';
+import { useDraggableLabel } from './use-draggable-label';
 
 export const useContextMenuHandlers = (triggerId: string) => {
-  const { size, isResizing } = useSizeContext();
+  const { size, isResizing } = useSize();
   const { width, height } = size;
   const {
     isVisible,
@@ -19,14 +19,14 @@ export const useContextMenuHandlers = (triggerId: string) => {
     setOffset,
     pinned,
     setPinned,
-  } = useContextMenuContext();
-  const { setSearchTerm } = useSearchContext();
+  } = useContextMenu();
+  const { setSearchTerm } = useSearch();
   const {
     position: draggedPosition,
     isDraggable,
     setIsDraggable,
-  } = useDraggableContext();
-  const { opacity } = useDraggableLabelValueContext();
+  } = useDraggable();
+  const { opacity } = useDraggableLabel();
   const menuRef = useRef<HTMLDivElement>(null);
 
   const getTriggerElementRect = () => {
@@ -34,7 +34,7 @@ export const useContextMenuHandlers = (triggerId: string) => {
     return triggerElement?.getBoundingClientRect();
   };
 
-  const handleContextMenu = (event: MouseEvent) => {
+  const handleContextMenu = async (event: MouseEvent) => {
     if (pinned) return;
 
     const rect = getTriggerElementRect();
@@ -66,6 +66,11 @@ export const useContextMenuHandlers = (triggerId: string) => {
 
       const offsetX = adjustedX - draggedPosition.x;
       const offsetY = adjustedY - draggedPosition.y;
+
+      await setStorageData((data) => ({
+        ...data,
+        offset: { x: offsetX, y: offsetY },
+      }))
       setOffset({ x: offsetX, y: offsetY });
       setPosition({ x: adjustedX, y: adjustedY });
       setIsVisible(true);

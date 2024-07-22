@@ -1,7 +1,7 @@
 import React, { useCallback, useRef } from 'react';
 import { setStorageData } from '@src/config/storage';
 import { gap } from '@src/config/types';
-import { useDraggableContext } from '../hooks/use-draggable-context';
+import { useDraggable } from '../hooks/use-draggable';
 
 interface DraggableProps {
   triggerId: string;
@@ -12,7 +12,7 @@ export const Draggable: React.FC<DraggableProps> = ({
   triggerId,
   children,
 }) => {
-  const { position, setPosition, isDraggable } = useDraggableContext();
+  const { position, setPosition, isDraggable } = useDraggable();
   const ref = useRef<HTMLDivElement>(null);
 
   const handleMouseMove = useCallback(

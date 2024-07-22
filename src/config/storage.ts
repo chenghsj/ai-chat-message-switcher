@@ -10,6 +10,7 @@ type StorageData = {
   'chatgpt-message-switcher': {
     draggable?: boolean;
     draggedPosition?: Position;
+    offset?: { x: number; y: number };
     size?: { width: number; height: number };
     pinned?: boolean;
     opacity?: number;
@@ -55,7 +56,7 @@ export function setStorageData(
   });
 }
 
-export function resetToDefault(): Promise<void> {
+export function resetStorageData(): Promise<void> {
   return new Promise((resolve, reject) => {
     const defaultData: StorageData[typeof DEFAULT_KEY] = {
       draggable: true,

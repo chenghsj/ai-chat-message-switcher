@@ -28,11 +28,11 @@ export const TriggerTypeProvider: React.FC<TriggerTypeProviderProps> = ({
   );
 };
 
-export const userTriggerTypeContext = () => {
+export const userTriggerType = () => {
   const context = useContext(TriggerTypeContext);
   if (context === undefined) {
     throw new Error(
-      'userTriggerTypeContext must be used within a TriggerTypeProvider'
+      'userTriggerType must be used within a TriggerTypeProvider'
     );
   }
   return context;

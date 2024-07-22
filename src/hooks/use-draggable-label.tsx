@@ -20,7 +20,7 @@ const DraggableLabelValueContext = createContext<
   DraggableLabelValueContextType | undefined
 >(undefined);
 
-interface DraggableLabelValueProviderProps {
+interface DraggableLabelProviderProps {
   children: ReactNode;
   initialOpacity: number;
 }
@@ -29,8 +29,8 @@ export const step = 0.01;
 export const min = 0.05;
 export const max = 1;
 
-export const DraggableLabelValueProvider: React.FC<
-  DraggableLabelValueProviderProps
+export const DraggableLabelProvider: React.FC<
+  DraggableLabelProviderProps
 > = ({ children, initialOpacity }) => {
   const [opacity, setOpacity] = useState<number>(initialOpacity);
   const valueRef = useRef(opacity);
@@ -86,12 +86,12 @@ export const DraggableLabelValueProvider: React.FC<
   );
 };
 
-export const useDraggableLabelValueContext =
+export const useDraggableLabel =
   (): DraggableLabelValueContextType => {
     const context = useContext(DraggableLabelValueContext);
     if (!context) {
       throw new Error(
-        'useDraggableLabelValueContext must be used within a DraggableLabelValueProvider'
+        'useDraggableLabel must be used within a DraggableLabelProvider'
       );
     }
     return context;

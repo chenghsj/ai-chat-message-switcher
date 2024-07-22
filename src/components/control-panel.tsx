@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { triggerId } from '@src/config/types';
-import { userTriggerTypeContext } from '@src/hooks/use-trigger-type-context';
+import { userTriggerType } from '@src/hooks/use-trigger-type';
 import { ChevronDown, ChevronUp, Dot } from 'lucide-react';
 import { useChatNode } from '../hooks/use-chat-node';
-import { useDraggableContext } from '../hooks/use-draggable-context';
+import { useDraggable } from '../hooks/use-draggable';
 import { cn } from '../utils/cn';
 import { Draggable } from './draggable';
 import { Button } from './ui/button';
 
 export const ControlPanel: React.FC = () => {
-  const { setTriggerType } = userTriggerTypeContext();
+  const { setTriggerType } = userTriggerType();
   const { clickNodeIndex, setClickNodeIndex, nodes, role } = useChatNode();
-  const { isDraggable } = useDraggableContext();
+  const { isDraggable } = useDraggable();
   const [disable, setDisable] = useState({
     up: false,
     down: false,
@@ -64,7 +64,7 @@ export const ControlPanel: React.FC = () => {
         <Button
           className={cn(
             clickNodeIndex === 0 &&
-              'border-none opacity-40 dark:hover:bg-transparent'
+            'border-none opacity-40 dark:hover:bg-transparent'
           )}
           variant='panel'
           size='none'

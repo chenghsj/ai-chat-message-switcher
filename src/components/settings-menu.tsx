@@ -1,14 +1,19 @@
-import { resetToDefault, setStorageData } from '@src/config/storage';
+import { resetStorageData, setStorageData } from '@src/config/storage';
 import {
   initialContextMenuPosition,
   initialOpacity,
   initialSize,
   parsedInitialControlPanelPosition,
 } from '@src/config/types';
-import { useContextMenuContext } from '@src/hooks/use-context-menu-context';
-import { useDraggableContext } from '@src/hooks/use-draggable-context';
-import { max, min, step, useDraggableLabelValueContext } from '@src/hooks/use-draggable-label-value-context';
-import { useSizeContext } from '@src/hooks/use-size-context';
+import { useContextMenu } from '@src/hooks/use-context-menu';
+import { useDraggable } from '@src/hooks/use-draggable';
+import {
+  max,
+  min,
+  step,
+  useDraggableLabel,
+} from '@src/hooks/use-draggable-label';
+import { useSize } from '@src/hooks/use-size';
 import { cn } from '@src/utils/cn';
 import { Droplet, Hand, Pin } from 'lucide-react';
 import { Button } from './ui/button';
@@ -18,20 +23,20 @@ import { Label } from './ui/label';
 import { Switch } from './ui/switch';
 
 export function SettingsMenu() {
-  const { setSize } = useSizeContext();
-  const { isDraggable, setIsDraggable, setPosition } = useDraggableContext();
+  const { setSize } = useSize();
+  const { isDraggable, setIsDraggable, setPosition } = useDraggable();
   const {
     pinned,
     setPinned,
     setIsVisible,
     setPosition: setContextMenuPosition,
-  } = useContextMenuContext();
+  } = useContextMenu();
   const {
     opacity,
     setOpacity,
     handleInputChange: handleOpacityChange,
     handleMouseDown: handleLabelMouseDown,
-  } = useDraggableLabelValueContext();
+  } = useDraggableLabel();
 
   const handlePinChange = async () => {
     await setStorageData((data) => ({
@@ -50,7 +55,7 @@ export function SettingsMenu() {
   };
 
   const handleReset = async () => {
-    await resetToDefault();
+    await resetStorageData();
 
     setIsDraggable(true);
     setPinned(false);
