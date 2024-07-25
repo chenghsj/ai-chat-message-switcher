@@ -4,10 +4,10 @@ import './style.css';
 
 function main() {
   const div = document.createElement('div');
-  div.id = 'chatgpt-message-switcher';
+  div.id = 'chat-message-switcher';
   document.body.appendChild(div);
 
-  const rootContainer = document.querySelector('#chatgpt-message-switcher');
+  const rootContainer = document.querySelector('#chat-message-switcher');
   if (!rootContainer) throw new Error("Can't find Content root element");
   const root = createRoot(rootContainer);
 

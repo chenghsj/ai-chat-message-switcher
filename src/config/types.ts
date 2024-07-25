@@ -1,7 +1,10 @@
 import { parsePosition } from '@src/utils/parse-position';
 
+export type OriginType = 'https://gemini.google.com' | 'https://chatgpt.com';
+export const siteOrigin = window.location.origin as OriginType;
+
 export const triggerId = {
-  grabContextMenu: 'context-menu-grap-trigger',
+  grabContextMenu: 'context-menu-grab-trigger',
   openContextMenu: 'context-menu-open-trigger',
 } as const;
 

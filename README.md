@@ -1,11 +1,11 @@
-# ChatGPT Message Switcher
+# AI Chat Message Switcher
 
 [Chrome](https://chrome.google.com/webstore/detail/eihabkibbhhklajnohjngcnfgnobodbj) <br>
 [Edge](https://microsoftedge.microsoft.com/addons/detail/chatgpt-message-switcher/jklfagjjdkaclkdbicaoheplcaeoiojm)
 
 ## Key Features
 
-- **Easy Navigation:** Use up and down buttons to move through user and assistant messages separately.
+- **Supports:** Works with both ChatGPT and Gemini.
 - **Role-Based Control:** Manage message access and navigation for 'user' and 'assistant' roles independently.
 - **User-Friendly:** Simple and intuitive interface for all users.
 - **Efficient:** Quickly find and respond to messages, improving communication flow.
@@ -23,6 +23,7 @@
 
 - Add a list to the side panel.
 - Decide whether to implement keyboard control features.
+- Fix window resizing panel position issue.
 
 ## Known Bugs
 

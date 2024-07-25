@@ -64,17 +64,20 @@ export const ControlPanel: React.FC = () => {
         <Button
           className={cn(
             clickNodeIndex === 0 &&
-            'border-none opacity-40 dark:hover:bg-transparent'
+              'border-none opacity-40 dark:hover:bg-transparent'
           )}
           variant='panel'
           size='none'
           onClick={() => handleArrowClick('up')}
           disabled={disable.up}
         >
-          <ChevronUp />
+          <ChevronUp className='dark:text-white' />
         </Button>
         {isDraggable && (
-          <Dot className='cursor-grab' id={triggerId.grabContextMenu} />
+          <Dot
+            className='cursor-grab dark:text-white'
+            id={triggerId.grabContextMenu}
+          />
         )}
         <Button
           variant='panel'
@@ -82,7 +85,7 @@ export const ControlPanel: React.FC = () => {
           onClick={() => handleArrowClick('down')}
           disabled={disable.down}
         >
-          <ChevronDown />
+          <ChevronDown className='dark:text-white' />
         </Button>
       </div>
     </Draggable>

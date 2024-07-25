@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
-import { useElementsWithAttribute } from './use-element-with-attribute';
+import { useGetElementByOrigin } from './use-get-elements-by-origin';
 
 interface ChatNodeContextProps {
   nodes: HTMLElement[];
@@ -11,7 +11,7 @@ interface ChatNodeContextProps {
   setIsExpanded: React.Dispatch<React.SetStateAction<boolean[]>>;
 }
 
-export const chatNodeRole = {
+const chatNodeRole = {
   user: 'user',
   assistant: 'assistant',
 } as const;
@@ -29,10 +29,7 @@ export const ChatNodeProvider: React.FC<{ children: React.ReactNode }> = ({
   const [role, setRole] = useState<ChatNodeRoleType>('user');
   const [isExpanded, setIsExpanded] = useState<boolean[]>([]);
 
-  const nodes = useElementsWithAttribute(
-    'data-message-author-role',
-    role
-  ) as HTMLElement[];
+  const nodes = useGetElementByOrigin(role) as HTMLElement[];
 
   return (
     <ChatNodeContext.Provider

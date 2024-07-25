@@ -4,20 +4,27 @@ import {
   initialSize,
   parsedInitialControlPanelPosition,
 } from './types';
+import { siteOrigin } from './types';
+
+type StoredData = {
+  draggable?: boolean;
+  draggedPosition?: Position;
+  offset?: { x: number; y: number };
+  size?: { width: number; height: number };
+  pinned?: boolean;
+  opacity?: number;
+};
 
 // Define the type for the storage object
 type StorageData = {
-  'chatgpt-message-switcher': {
-    draggable?: boolean;
-    draggedPosition?: Position;
-    offset?: { x: number; y: number };
-    size?: { width: number; height: number };
-    pinned?: boolean;
-    opacity?: number;
-  };
+  'chatgpt-message-switcher': StoredData;
+  'gemini-message-switcher': StoredData;
 };
 
-const DEFAULT_KEY: keyof StorageData = 'chatgpt-message-switcher';
+const DEFAULT_KEY: keyof StorageData =
+  siteOrigin === 'https://chatgpt.com'
+    ? 'chatgpt-message-switcher'
+    : 'gemini-message-switcher';
 
 // Function to get storage data in a type-safe manner using the default key
 export function getStorageData(): Promise<StorageData[typeof DEFAULT_KEY]> {

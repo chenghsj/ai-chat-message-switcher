@@ -65,10 +65,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
           }}
         >
           <div className='scale-[0.65]'>
-            {role === 'user' ? <User /> : <Bot />}
+            {role === 'user' ? (
+              <User className='dark:text-white' />
+            ) : (
+              <Bot className='dark:text-white' />
+            )}
           </div>
 
-          {capitalize(role)}
+          <div className='dark:text-white'>{capitalize(role)}</div>
         </Button>
         {isResizing ? (
           <Badge variant='outline'>
@@ -82,14 +86,14 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
                 className={cn(!pinned && 'opacity-25', 'cursor-pointer')}
                 onClick={handlePinChange}
               >
-                <Pin />
+                <Pin className='dark:text-white' />
               </div>
               <div
                 title='Draggable'
                 className={cn(!isDraggable && 'opacity-25', 'cursor-pointer')}
                 onClick={handleDraggableChange}
               >
-                <Hand />
+                <Hand className='dark:text-white' />
               </div>
             </div>
             <Separator

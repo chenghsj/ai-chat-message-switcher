@@ -112,7 +112,7 @@ export const Draggable: React.FC<DraggableProps> = ({
       id={triggerId}
       ref={ref}
       onMouseDown={handleMouseDown}
-      className='absolute cursor-move select-none'
+      className='absolute z-10 cursor-move select-none'
       style={{ left: `${position.x}px`, top: `${position.y}px` }}
     >
       {children}
