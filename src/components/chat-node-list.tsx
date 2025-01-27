@@ -144,19 +144,17 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           <div
             className={cn(
               'chat-text-content-invisible',
-              'invisible absolute flex w-full justify-between border'
+              'invisible absolute flex w-full justify-between border text-sm'
             )}
           >
-            <div className={cn('py-2 pl-3')}>
-              {node.textContent || ''}
-            </div>
+            <div className={cn('py-2 pl-3')}>{node.textContent || ''}</div>
             <div className='h-10 w-8'></div>
           </div>
 
           <div
             className={cn(
               'chat-text-content-visible',
-              'flex flex-1 justify-between overflow-y-auto py-2 pl-3'
+              'flex flex-1 justify-between overflow-y-auto py-2 pl-3 text-sm'
             )}
             onClick={() => {
               if (isExpanded[index]) return;
@@ -168,13 +166,13 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
               className={cn(
                 'w-full text-ellipsis whitespace-nowrap pr-1 text-sm transition',
                 isExpanded[index]
-                  ? 'overflow-y-auto whitespace-pre-wrap select-text cursor-auto'
+                  ? 'cursor-auto select-text overflow-y-auto whitespace-pre-wrap'
                   : 'overflow-hidden whitespace-nowrap'
               )}
-              title={isExpanded[index] ? '' : (node.textContent ?? '')}
+              title={isExpanded[index] ? '' : node.textContent ?? ''}
               onClick={(e) => {
                 if (isExpanded[index]) {
-                  e.stopPropagation()
+                  e.stopPropagation();
                 }
               }}
             >

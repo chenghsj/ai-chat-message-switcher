@@ -1,7 +1,12 @@
 import { parsePosition } from '@src/utils/parse-position';
 
-export type OriginType = 'https://gemini.google.com' | 'https://chatgpt.com';
-export const siteOrigin = window.location.origin as OriginType;
+export enum OriginEnum {
+  gemini = 'https://gemini.google.com',
+  chatGPT = 'https://chatgpt.com',
+  deepSeek = 'https://chat.deepseek.com',
+}
+
+export const siteOrigin = window.location.origin as `${OriginEnum}`;
 
 export const triggerId = {
   grabContextMenu: 'context-menu-grab-trigger',

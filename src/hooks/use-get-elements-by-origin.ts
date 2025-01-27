@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { siteOrigin } from '@src/config/types';
+import { OriginEnum, siteOrigin } from '@src/config/types';
 import { ChatNodeRoleType } from './use-chat-node';
 
 export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
@@ -12,12 +12,16 @@ export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
       setElements(Array.from(foundElements));
     }
 
-    function findElementsByClassName() {
-      const className =
-        role === 'user' ? 'query-content' : 'model-response-text ';
+    const findElementsByClassName = () => {
+      const classNames: Partial<Record<`${OriginEnum}`, string>> = {
+        'https://gemini.google.com':
+          role === 'user' ? 'query-content' : 'model-response-text',
+        'https://chat.deepseek.com': role === 'user' ? 'fbb737a4' : 'f9bf7997',
+      };
+      const className = classNames[siteOrigin] || '';
       const foundElements = document.getElementsByClassName(className);
       setElements(Array.from(foundElements));
-    }
+    };
 
     if (siteOrigin === 'https://chatgpt.com') {
       findElementsByAttribute();
@@ -26,11 +30,12 @@ export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
     }
 
     // Optional: Add mutation observer to update elements when DOM changes
-    const observer = new MutationObserver(
+    const observerCallback =
       siteOrigin === 'https://chatgpt.com'
         ? findElementsByAttribute
-        : findElementsByClassName
-    );
+        : findElementsByClassName;
+    const observer = new MutationObserver(observerCallback);
+
     observer.observe(document.body, {
       childList: true,
       subtree: true,

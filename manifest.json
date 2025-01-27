@@ -12,7 +12,11 @@
   "permissions": ["storage"],
   "content_scripts": [
     {
-      "matches": ["https://chatgpt.com/*", "https://gemini.google.com/*"],
+      "matches": [
+        "https://chatgpt.com/*",
+        "https://gemini.google.com/*",
+        "https://chat.deepseek.com/*"
+      ],
       "js": ["src/pages/content/index.tsx"],
       "css": ["contentStyle.css"]
     }

@@ -19,12 +19,21 @@ type StoredData = {
 type StorageData = {
   'chatgpt-message-switcher': StoredData;
   'gemini-message-switcher': StoredData;
+  'deepseek-message-switcher': StoredData;
 };
 
-const DEFAULT_KEY: keyof StorageData =
-  siteOrigin === 'https://chatgpt.com'
-    ? 'chatgpt-message-switcher'
-    : 'gemini-message-switcher';
+const DEFAULT_KEY: keyof StorageData = (() => {
+  switch (siteOrigin) {
+    case 'https://chatgpt.com':
+      return 'chatgpt-message-switcher';
+    case 'https://gemini.google.com':
+      return 'gemini-message-switcher';
+    case 'https://chat.deepseek.com':
+      return 'deepseek-message-switcher';
+    default:
+      return 'chatgpt-message-switcher';
+  }
+})();
 
 // Function to get storage data in a type-safe manner using the default key
 export function getStorageData(): Promise<StorageData[typeof DEFAULT_KEY]> {

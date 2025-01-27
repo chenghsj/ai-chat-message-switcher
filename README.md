@@ -5,8 +5,8 @@
 
 ## Key Features
 
-- **Supports:** Works with both ChatGPT and Gemini.
-- **Role-Based Control:** Manage message access and navigation for 'user' and 'assistant' roles independently.
+- **Supports:** Works with both ChatGPT, Gemini and DeepSeek.
+- **Role-Based Control:** Manage message access and navigation for `user` and `assistant` roles independently.
 - **User-Friendly:** Simple and intuitive interface for all users.
 - **Efficient:** Quickly find and respond to messages, improving communication flow.
 
