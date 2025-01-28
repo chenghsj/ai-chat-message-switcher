@@ -8,10 +8,12 @@ import { ControlPanel } from './control-panel';
 import { Resizable } from './resizable';
 
 const App: React.FC = () => {
-  if (siteOrigin === 'https://gemini.google.com') {
-    useInitialTheme();
-    useBodyThemeObserver();
-  }
+  const shouldApplyTheme =
+    siteOrigin === 'https://gemini.google.com' ||
+    siteOrigin === 'https://chat.deepseek.com';
+
+  useInitialTheme(shouldApplyTheme);
+  useBodyThemeObserver(shouldApplyTheme);
 
   return (
     <AppProvider>

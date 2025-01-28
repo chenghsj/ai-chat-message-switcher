@@ -29,19 +29,25 @@ export const step = 0.01;
 export const min = 0.05;
 export const max = 1;
 
-export const DraggableLabelProvider: React.FC<
-  DraggableLabelProviderProps
-> = ({ children, initialOpacity }) => {
+export const DraggableLabelProvider: React.FC<DraggableLabelProviderProps> = ({
+  children,
+  initialOpacity,
+}) => {
   const [opacity, setOpacity] = useState<number>(initialOpacity);
   const valueRef = useRef(opacity);
   const startValueRef = useRef<number>(0);
   const startXRef = useRef<number>(0);
+  const controller = useRef<AbortController | null>(null);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLSpanElement>) => {
+    controller.current = new AbortController();
+    const { signal } = controller.current;
+
     startXRef.current = e.clientX;
     startValueRef.current = opacity;
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+
+    document.addEventListener('mousemove', handleMouseMove, { signal });
+    document.addEventListener('mouseup', handleMouseUp, { signal });
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -59,8 +65,8 @@ export const DraggableLabelProvider: React.FC<
       ...data,
       opacity: valueRef.current,
     }));
-    document.removeEventListener('mousemove', handleMouseMove);
-    document.removeEventListener('mouseup', handleMouseUp);
+
+    controller.current?.abort();
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -73,7 +79,7 @@ export const DraggableLabelProvider: React.FC<
 
   useEffect(() => {
     getStorageData().then((data) => {
-      setOpacity(data.opacity ?? initialOpacity);
+      setOpacity(data?.opacity ?? initialOpacity);
     });
   }, []);
 
@@ -86,13 +92,12 @@ export const DraggableLabelProvider: React.FC<
   );
 };
 
-export const useDraggableLabel =
-  (): DraggableLabelValueContextType => {
-    const context = useContext(DraggableLabelValueContext);
-    if (!context) {
-      throw new Error(
-        'useDraggableLabel must be used within a DraggableLabelProvider'
-      );
-    }
-    return context;
-  };
+export const useDraggableLabel = (): DraggableLabelValueContextType => {
+  const context = useContext(DraggableLabelValueContext);
+  if (!context) {
+    throw new Error(
+      'useDraggableLabel must be used within a DraggableLabelProvider'
+    );
+  }
+  return context;
+};

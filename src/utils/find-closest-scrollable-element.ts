@@ -1,3 +1,5 @@
+// not being used
+
 function isScrollable(element: HTMLElement): boolean {
   const hasScrollableContent = element.scrollHeight > element.clientHeight;
   const overflowYStyle = window.getComputedStyle(element).overflowY;

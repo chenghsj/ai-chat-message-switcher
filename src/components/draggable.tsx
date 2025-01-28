@@ -14,6 +14,7 @@ export const Draggable: React.FC<DraggableProps> = ({
 }) => {
   const { position, setPosition, isDraggable } = useDraggable();
   const ref = useRef<HTMLDivElement>(null);
+  const controller = useRef<AbortController | null>(null);
 
   const handleMouseMove = useCallback(
     (
@@ -60,8 +61,7 @@ export const Draggable: React.FC<DraggableProps> = ({
       const newX = initialElementX + deltaX;
       const newY = initialElementY + deltaY;
 
-      document.removeEventListener('mousemove', boundMouseMove.current!);
-      document.removeEventListener('mouseup', boundMouseUp.current!);
+      controller.current?.abort();
 
       await setStorageData((data) => ({
         ...data,
@@ -77,6 +77,9 @@ export const Draggable: React.FC<DraggableProps> = ({
   const handleMouseDown = useCallback(
     (event: React.MouseEvent) => {
       if (event.button !== 0 || !isDraggable) return;
+
+      controller.current = new AbortController();
+      const { signal } = controller.current;
 
       const initialMouseX = event.clientX;
       const initialMouseY = event.clientY;
@@ -101,8 +104,10 @@ export const Draggable: React.FC<DraggableProps> = ({
           initialElementY
         );
 
-      document.addEventListener('mousemove', boundMouseMove.current);
-      document.addEventListener('mouseup', boundMouseUp.current);
+      document.addEventListener('mousemove', boundMouseMove.current, {
+        signal,
+      });
+      document.addEventListener('mouseup', boundMouseUp.current, { signal });
     },
     [isDraggable, position, handleMouseMove, handleMouseUp]
   );

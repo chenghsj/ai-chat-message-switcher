@@ -57,7 +57,8 @@ export const ControlPanel: React.FC = () => {
       <div
         className={cn(
           'flex h-fit w-9 cursor-pointer flex-col items-center justify-evenly rounded-full border bg-white opacity-60 shadow-sm transition duration-200 hover:opacity-100',
-          'dark:border-none dark:bg-zinc-700'
+          'dark:border-none dark:bg-zinc-700',
+          'text-zinc-950 dark:text-zinc-50'
         )}
         id={triggerId.openContextMenu}
       >

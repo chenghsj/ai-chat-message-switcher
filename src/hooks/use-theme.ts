@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+const darkThemeList = ['dark', 'dark-theme'];
+
 const updateHtmlClass = (isDarkMode: boolean) => {
   const htmlElement = document.documentElement;
 
@@ -12,14 +14,21 @@ const updateHtmlClass = (isDarkMode: boolean) => {
   }
 };
 
-export const useInitialTheme = () => {
+export const useInitialTheme = (shouldApplyTheme: boolean) => {
+  if (!shouldApplyTheme) return;
+
   useEffect(() => {
-    const isDarkMode = document.body.classList.contains('dark-theme');
+    const isDarkMode = darkThemeList.some((theme) =>
+      document.body.classList.contains(theme)
+    );
+
     updateHtmlClass(isDarkMode);
   }, []);
 };
 
-export const useBodyThemeObserver = () => {
+export const useBodyThemeObserver = (shouldApplyTheme: boolean) => {
+  if (!shouldApplyTheme) return;
+
   useEffect(() => {
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
@@ -27,7 +36,9 @@ export const useBodyThemeObserver = () => {
           mutation.type === 'attributes' &&
           mutation.attributeName === 'class'
         ) {
-          const isDarkMode = (mutation.target as HTMLElement).classList.contains('dark-theme');
+          const isDarkMode = darkThemeList.some((theme) =>
+            (mutation.target as HTMLElement).classList.contains(theme)
+          );
           updateHtmlClass(isDarkMode);
         }
       });

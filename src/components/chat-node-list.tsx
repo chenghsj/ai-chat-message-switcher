@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef } from 'react';
+import { OriginEnum, siteOrigin } from '@src/config/types';
 import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useSize } from '@src/hooks/use-size';
 import { userTriggerType } from '@src/hooks/use-trigger-type';
 import { cn } from '@src/utils/cn';
 import { findClosestDivIndex } from '@src/utils/find-closest-div-index';
-import { findClosestScrollableElement } from '@src/utils/find-closest-scrollable-element';
 import { throttle } from '@src/utils/throttle';
 import { ChevronDown } from 'lucide-react';
 import { useChatNode } from '../hooks/use-chat-node';
@@ -29,10 +29,30 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     nodes: roleNodes,
     role,
   } = useChatNode();
-  const parentElement = useMemo(
-    () => findClosestScrollableElement(roleNodes[0]),
-    [roleNodes]
-  );
+  const parentElement = useMemo(() => {
+    const gptRegex = /^react-scroll-to-bottom--css-[a-zA-Z0-9]+-1n7m0yu$/;
+    const elements = document.querySelectorAll('*');
+
+    const findChatGptParent = () => {
+      return Array.from(elements).find((element) =>
+        Array.from(element.classList).some((className) =>
+          gptRegex.test(className)
+        )
+      );
+    };
+
+    const parent: Partial<Record<`${OriginEnum}`, Element>> = {
+      'https://chatgpt.com': findChatGptParent(),
+      'https://gemini.google.com':
+        document.querySelector('[data-test-id="chat-history-container"]') ||
+        undefined,
+      'https://chat.deepseek.com':
+        document.getElementsByClassName('f6004764')[0],
+    };
+
+    return parent[siteOrigin];
+  }, [roleNodes]);
+
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const filterNodes = useMemo(
@@ -95,7 +115,11 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     setIsExpanded(new Array(roleNodes.length).fill(false));
   }, [roleNodes.length, setClickNodeIndex, setIsExpanded]);
 
+  // Scroll to the closest node when the context menu is opened
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const handleScroll = throttle(() => {
       if (triggerType === 'window-scroll') {
         setClickNodeIndex(findClosestDivIndex(roleNodes));
@@ -103,10 +127,10 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
       setTriggerType('window-scroll');
     }, 200);
 
-    parentElement?.addEventListener('scroll', handleScroll);
+    parentElement?.addEventListener('scroll', handleScroll, { signal });
 
     return () => {
-      parentElement?.removeEventListener('scroll', handleScroll);
+      controller.abort();
     };
   }, [
     parentElement,
@@ -131,6 +155,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
           className={cn(
             'relative cursor-pointer overflow-hidden rounded-lg border shadow-sm transition-[height] duration-200',
             'box-content flex justify-between',
+            'text-zinc-950 dark:text-zinc-50',
             { 'bg-gray-200 dark:bg-zinc-900': clickNodeIndex === index },
             { 'font-medium': !isExpanded[index] }
           )}

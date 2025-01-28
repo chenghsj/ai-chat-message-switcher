@@ -70,7 +70,7 @@ export const useContextMenuHandlers = (triggerId: string) => {
       await setStorageData((data) => ({
         ...data,
         offset: { x: offsetX, y: offsetY },
-      }))
+      }));
       setOffset({ x: offsetX, y: offsetY });
       setPosition({ x: adjustedX, y: adjustedY });
       setIsVisible(true);
@@ -160,6 +160,9 @@ export const useContextMenuHandlers = (triggerId: string) => {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const handleMouseEnter = () => {
       menuRef.current!.style.opacity = '1';
     };
@@ -171,23 +174,29 @@ export const useContextMenuHandlers = (triggerId: string) => {
       }
     };
     if (isVisible && menuRef.current) {
-      menuRef.current.addEventListener('mouseenter', handleMouseEnter);
-      menuRef.current.addEventListener('mouseleave', handleMouseLeave);
+      menuRef.current.addEventListener('mouseenter', handleMouseEnter, {
+        signal,
+      });
+      menuRef.current.addEventListener('mouseleave', handleMouseLeave, {
+        signal,
+      });
     }
     return () => {
       if (menuRef.current) {
-        menuRef.current.removeEventListener('mouseenter', handleMouseEnter);
-        menuRef.current.removeEventListener('mouseleave', handleMouseLeave);
+        controller.abort();
       }
     };
   }, [opacity, isVisible, isResizing]);
 
   useEffect(() => {
-    document.addEventListener('contextmenu', handleContextMenu);
-    document.addEventListener('click', handleClick);
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    document.addEventListener('contextmenu', handleContextMenu, { signal });
+    document.addEventListener('click', handleClick, { signal });
+
     return () => {
-      document.removeEventListener('contextmenu', handleContextMenu);
-      document.removeEventListener('click', handleClick);
+      controller.abort();
     };
   }, [draggedPosition, pinned, isResizing, isVisible]);
 
