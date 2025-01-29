@@ -24,11 +24,11 @@ type StorageData = {
 
 const DEFAULT_KEY: keyof StorageData = (() => {
   switch (siteOrigin) {
-    case 'https://chatgpt.com':
+    case 'chatGPT':
       return 'chatgpt-message-switcher';
-    case 'https://gemini.google.com':
+    case 'gemini':
       return 'gemini-message-switcher';
-    case 'https://chat.deepseek.com':
+    case 'deepSeek':
       return 'deepseek-message-switcher';
     default:
       return 'chatgpt-message-switcher';

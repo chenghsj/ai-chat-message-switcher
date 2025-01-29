@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import { OriginEnum, siteOrigin } from '@src/config/types';
+import { siteOrigin } from '@src/config/types';
 import { useContextMenu } from '@src/hooks/use-context-menu';
 import { useSize } from '@src/hooks/use-size';
 import { userTriggerType } from '@src/hooks/use-trigger-type';
@@ -41,13 +41,12 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
       );
     };
 
-    const parent: Partial<Record<`${OriginEnum}`, Element>> = {
-      'https://chatgpt.com': findChatGptParent(),
-      'https://gemini.google.com':
+    const parent: Partial<Record<typeof siteOrigin, Element>> = {
+      chatGPT: findChatGptParent(),
+      gemini:
         document.querySelector('[data-test-id="chat-history-container"]') ||
         undefined,
-      'https://chat.deepseek.com':
-        document.getElementsByClassName('f6004764')[0],
+      deepSeek: document.getElementsByClassName('f6004764')[0],
     };
 
     return parent[siteOrigin];
