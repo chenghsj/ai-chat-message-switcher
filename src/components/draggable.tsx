@@ -1,6 +1,10 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { setStorageData } from '@src/config/storage';
 import { gap } from '@src/config/types';
+import {
+  RESIZE_TRANSITION_DELAY,
+  useWindowResize,
+} from '@src/hooks/use-window-size';
 import { useDraggable } from '../hooks/use-draggable';
 
 interface DraggableProps {
@@ -13,6 +17,7 @@ export const Draggable: React.FC<DraggableProps> = ({
   children,
 }) => {
   const { position, setPosition, isDraggable } = useDraggable();
+  const { currentSize, previousSize, isResized } = useWindowResize();
   const ref = useRef<HTMLDivElement>(null);
   const controller = useRef<AbortController | null>(null);
 
@@ -112,13 +117,29 @@ export const Draggable: React.FC<DraggableProps> = ({
     [isDraggable, position, handleMouseMove, handleMouseUp]
   );
 
+  useEffect(() => {
+    setPosition({
+      ...position,
+      x:
+        position.x > previousSize.width / 2
+          ? position.x + (currentSize.width - previousSize.width)
+          : position.x,
+    });
+  }, [currentSize, previousSize, setPosition]);
+
   return (
     <div
       id={triggerId}
       ref={ref}
       onMouseDown={handleMouseDown}
       className='absolute z-10 cursor-move select-none'
-      style={{ left: `${position.x}px`, top: `${position.y}px` }}
+      style={{
+        left: `${position.x}px`,
+        top: `${position.y}px`,
+        transition: isResized
+          ? `all ${RESIZE_TRANSITION_DELAY / 1000}s ease`
+          : 'none',
+      }}
     >
       {children}
     </div>
