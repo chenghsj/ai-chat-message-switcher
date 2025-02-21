@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Message Switcher for ChatGPT/Gemini/DeepSeek",
+  "name": "Message Switcher for ChatGPT/Gemini/DeepSeek/Grok",
   "description": "A simple plugin that lets you easily navigate through user or assistant messages using up and down buttons.",
   "background": {
     "service_worker": "src/pages/background/index.ts",
