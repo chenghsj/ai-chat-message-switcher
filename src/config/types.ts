@@ -4,6 +4,7 @@ const origin = {
   'https://gemini.google.com': 'gemini',
   'https://chatgpt.com': 'chatGPT',
   'https://chat.deepseek.com': 'deepSeek',
+  'https://grok.com': 'grok',
 } as const;
 
 export const siteOrigin = origin[window.location.origin as keyof typeof origin];

@@ -15,7 +15,8 @@
       "matches": [
         "https://chatgpt.com/*",
         "https://gemini.google.com/*",
-        "https://chat.deepseek.com/*"
+        "https://chat.deepseek.com/*",
+        "https://grok.com/*"
       ],
       "js": ["src/pages/content/index.tsx"],
       "css": ["contentStyle.css"]

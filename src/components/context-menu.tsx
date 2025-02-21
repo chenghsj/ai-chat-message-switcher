@@ -38,7 +38,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
       id={contextMenuId}
       ref={menuRef}
       className={cn(
-        'absolute z-30 transition-opacity duration-200',
+        'absolute z-[80] transition-opacity duration-200',
         'flex flex-col gap-y-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm',
         'overflow-hidden dark:border-none dark:bg-zinc-700 dark:shadow-md dark:shadow-zinc-800',
         'text-zinc-950 dark:text-zinc-50',

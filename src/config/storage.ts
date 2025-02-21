@@ -20,6 +20,7 @@ type StorageData = {
   'chatgpt-message-switcher': StoredData;
   'gemini-message-switcher': StoredData;
   'deepseek-message-switcher': StoredData;
+  'grok-message-switcher': StoredData;
 };
 
 const DEFAULT_KEY: keyof StorageData = (() => {
@@ -30,6 +31,8 @@ const DEFAULT_KEY: keyof StorageData = (() => {
       return 'gemini-message-switcher';
     case 'deepSeek':
       return 'deepseek-message-switcher';
+    case 'grok':
+      return 'grok-message-switcher';
     default:
       return 'chatgpt-message-switcher';
   }

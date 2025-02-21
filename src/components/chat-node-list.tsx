@@ -30,23 +30,13 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     role,
   } = useChatNode();
   const parentElement = useMemo(() => {
-    const gptRegex = /^react-scroll-to-bottom--css-[a-zA-Z0-9]+-1n7m0yu$/;
-    const elements = document.querySelectorAll('*');
-
-    const findChatGptParent = () => {
-      return Array.from(elements).find((element) =>
-        Array.from(element.classList).some((className) =>
-          gptRegex.test(className)
-        )
-      );
-    };
-
     const parent: Partial<Record<typeof siteOrigin, Element>> = {
-      chatGPT: findChatGptParent(),
+      chatGPT: document.getElementsByClassName('[scrollbar-gutter:stable]')[0],
       gemini:
         document.querySelector('[data-test-id="chat-history-container"]') ||
         undefined,
       deepSeek: document.getElementsByClassName('f6004764')[0],
+      grok: document.getElementsByClassName('scrollbar-gutter-stable')[0],
     };
 
     return parent[siteOrigin];
@@ -207,7 +197,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
 
           <div
             className={cn(
-              `z-20 h-10 w-8 origin-center transform select-none transition duration-200`,
+              `z-[90] h-10 w-8 origin-center transform select-none transition duration-200`,
               'flex items-center justify-center',
               isExpanded[index] ? 'rotate-180' : '',
               calculateContentHeight(index).expandable

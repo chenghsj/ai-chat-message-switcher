@@ -13,13 +13,30 @@ export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
     }
 
     const findElementsByClassName = () => {
+      const getGrokRoleElements = (
+        role: ChatNodeRoleType,
+        elements: Element[]
+      ) => {
+        // grok user message is on even indexes, assistant message is on odd indexes
+        return role === 'user'
+          ? elements.filter((_, index) => index % 2 === 0)
+          : elements.filter((_, index) => index % 2 === 1);
+      };
+
       const classNames: Partial<Record<typeof siteOrigin, string>> = {
         gemini: role === 'user' ? 'query-content' : 'model-response-text',
         deepSeek: role === 'user' ? 'fbb737a4' : 'f9bf7997',
+        grok: 'message-row',
       };
       const className = classNames[siteOrigin] || '';
       const foundElements = document.getElementsByClassName(className);
-      setElements(Array.from(foundElements));
+      const foundElementsArray = Array.from(foundElements);
+
+      if (siteOrigin === 'grok') {
+        setElements(getGrokRoleElements(role, foundElementsArray));
+      } else {
+        setElements(foundElementsArray);
+      }
     };
 
     if (siteOrigin === 'chatGPT') {
