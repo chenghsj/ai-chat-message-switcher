@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { triggerId } from '@src/config/types';
 import { userTriggerType } from '@src/hooks/use-trigger-type';
 import { ChevronDown, ChevronUp, Dot } from 'lucide-react';
@@ -9,6 +9,7 @@ import { Draggable } from './draggable';
 import { Button } from './ui/button';
 
 export const ControlPanel: React.FC = () => {
+  const dragDotRef = useRef<HTMLSpanElement>(null);
   const { setTriggerType } = userTriggerType();
   const { clickNodeIndex, setClickNodeIndex, nodes, role } = useChatNode();
   const { isDraggable } = useDraggable();
@@ -48,6 +49,18 @@ export const ControlPanel: React.FC = () => {
     updateDisableState(newIndex);
   };
 
+  const handleMouseDown = () => {
+    if (dragDotRef.current) {
+      dragDotRef.current.style.cursor = 'grabbing';
+    }
+  };
+
+  const handleMouseUp = () => {
+    if (dragDotRef.current) {
+      dragDotRef.current.style.cursor = 'grab';
+    }
+  };
+
   useEffect(() => {
     updateDisableState(clickNodeIndex ?? 0);
   }, [clickNodeIndex]);
@@ -75,10 +88,14 @@ export const ControlPanel: React.FC = () => {
           <ChevronUp className='dark:text-white' />
         </Button>
         {isDraggable && (
-          <Dot
-            className='cursor-grab dark:text-white'
-            id={triggerId.grabContextMenu}
-          />
+          <span
+            ref={dragDotRef}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            className='cursor-grab'
+          >
+            <Dot className='dark:text-white' id={triggerId.grabContextMenu} />
+          </span>
         )}
         <Button
           variant='panel'

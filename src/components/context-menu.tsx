@@ -80,7 +80,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({ children }) => {
             {Math.floor(width)}x{Math.floor(height)}
           </Badge>
         ) : (
-          <div className='flex items-center'>
+          <div className='z-[100] flex items-center'>
             <div className='flex w-14 scale-[0.65] justify-end gap-1'>
               <div
                 title='Stay on top'

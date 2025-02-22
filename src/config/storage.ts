@@ -4,7 +4,6 @@ import {
   initialSize,
   parsedInitialControlPanelPosition,
 } from './types';
-import { siteOrigin } from './types';
 
 type StoredData = {
   draggable?: boolean;
@@ -15,53 +14,73 @@ type StoredData = {
   opacity?: number;
 };
 
-// Define the type for the storage object
-type StorageData = {
-  'chatgpt-message-switcher': StoredData;
-  'gemini-message-switcher': StoredData;
-  'deepseek-message-switcher': StoredData;
-  'grok-message-switcher': StoredData;
-};
-
-const DEFAULT_KEY: keyof StorageData = (() => {
-  switch (siteOrigin) {
-    case 'chatGPT':
-      return 'chatgpt-message-switcher';
-    case 'gemini':
-      return 'gemini-message-switcher';
-    case 'deepSeek':
-      return 'deepseek-message-switcher';
-    case 'grok':
-      return 'grok-message-switcher';
-    default:
-      return 'chatgpt-message-switcher';
-  }
-})();
-
-// Function to get storage data in a type-safe manner using the default key
-export function getStorageData(): Promise<StorageData[typeof DEFAULT_KEY]> {
+// Function to request tab ID from the background script
+function getCurrentTabId(): Promise<number> {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.get(DEFAULT_KEY, (data) => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
+    chrome.runtime.sendMessage({ action: 'getTabId' }, (response) => {
+      if (response && response.tabId) {
+        resolve(response.tabId);
       } else {
-        resolve(data[DEFAULT_KEY] as StorageData[typeof DEFAULT_KEY]);
+        reject(new Error('Failed to retrieve tab ID'));
       }
     });
   });
 }
 
-// Function to set storage data in a type-safe manner using a callback
+// Function to get storage data for the current tab
+export function getStorageData(): Promise<StoredData> {
+  return new Promise((resolve, reject) => {
+    getCurrentTabId()
+      .then((tabId) => {
+        chrome.storage.local.get(`${tabId}`, (data) => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve(data[tabId] || {});
+          }
+        });
+      })
+      .catch(reject);
+  });
+}
+
+// Function to set storage data for the current tab
 export function setStorageData(
-  callback: (
-    currentData: StorageData[typeof DEFAULT_KEY]
-  ) => StorageData[typeof DEFAULT_KEY]
+  callback: (currentData: StoredData) => StoredData
 ): Promise<void> {
   return new Promise((resolve, reject) => {
-    getStorageData()
-      .then((currentData) => {
-        const newData = callback(currentData);
-        chrome.storage.sync.set({ [DEFAULT_KEY]: newData }, () => {
+    getCurrentTabId()
+      .then((tabId) => {
+        getStorageData()
+          .then((currentData) => {
+            const newData = callback(currentData);
+            chrome.storage.local.set({ [tabId]: newData }, () => {
+              if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError);
+              } else {
+                resolve();
+              }
+            });
+          })
+          .catch(reject);
+      })
+      .catch(reject);
+  });
+}
+
+// Function to reset storage data for the current tab
+export function resetStorageData(): Promise<void> {
+  return new Promise((resolve, reject) => {
+    getCurrentTabId()
+      .then((tabId) => {
+        const defaultData: StoredData = {
+          draggable: true,
+          draggedPosition: parsedInitialControlPanelPosition,
+          size: initialSize,
+          pinned: false,
+          opacity: initialOpacity,
+        };
+        chrome.storage.local.set({ [tabId]: defaultData }, () => {
           if (chrome.runtime.lastError) {
             reject(chrome.runtime.lastError);
           } else {
@@ -69,80 +88,23 @@ export function setStorageData(
           }
         });
       })
-      .catch((error) => {
-        reject(error);
-      });
+      .catch(reject);
   });
 }
 
-export function resetStorageData(): Promise<void> {
-  return new Promise((resolve, reject) => {
-    const defaultData: StorageData[typeof DEFAULT_KEY] = {
-      draggable: true,
-      draggedPosition: parsedInitialControlPanelPosition,
-      size: initialSize,
-      pinned: false,
-      opacity: initialOpacity,
-    };
-
-    chrome.storage.sync.set(
-      {
-        [DEFAULT_KEY]: defaultData,
-      },
-      () => {
-        if (chrome.runtime.lastError) {
-          reject(chrome.runtime.lastError);
-        } else {
-          resolve();
-        }
-      }
-    );
-  });
-}
-
-// Function to clear a specific item from storage in a type-safe manner using the default key
+// Function to clear storage data for the current tab
 export function clearStorageData(): Promise<void> {
   return new Promise((resolve, reject) => {
-    chrome.storage.sync.remove(DEFAULT_KEY, () => {
-      if (chrome.runtime.lastError) {
-        reject(chrome.runtime.lastError);
-      } else {
-        resolve();
-      }
-    });
+    getCurrentTabId()
+      .then((tabId) => {
+        chrome.storage.local.remove(`${tabId}`, () => {
+          if (chrome.runtime.lastError) {
+            reject(chrome.runtime.lastError);
+          } else {
+            resolve();
+          }
+        });
+      })
+      .catch(reject);
   });
 }
-
-// Example usage of the getStorageData function
-// getStorageData()
-//   .then((settings) => {
-//     const isDraggable: boolean = settings.draggable ?? true;
-//     setIsDraggable(isDraggable);
-//     handleSize(settings.size ?? { width: 0, height: 0 });
-//   })
-//   .catch((error) => {
-//     console.error('Error getting storage data:', error);
-//   });
-
-// Example usage of the setStorageData function with a callback
-// setStorageData((currentData) => {
-//   return {
-//     ...currentData,
-//     draggable: !currentData.draggable,
-//     size: !currentData.size
-//       ? {
-//           width: 400,
-//           height: 400,
-//         }
-//       : {
-//           width: currentData.size.width + 100,
-//           height: currentData.size.height + 100,
-//         },
-//   };
-// })
-//   .then(() => {
-//     console.log('Storage data set successfully.');
-//   })
-//   .catch((error) => {
-//     console.error('Error setting storage data:', error);
-//   });
