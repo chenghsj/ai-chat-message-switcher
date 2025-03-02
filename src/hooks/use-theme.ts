@@ -2,6 +2,12 @@ import { useEffect } from 'react';
 
 const darkThemeList = ['dark', 'dark-theme'];
 
+interface ThemeObserverConfig {
+  attributeName: string;
+  getIsDarkMode: (target: HTMLElement) => boolean;
+  targetSelector: () => HTMLElement | null;
+}
+
 const updateHtmlClass = (isDarkMode: boolean) => {
   const htmlElement = document.documentElement;
 
@@ -18,43 +24,69 @@ export const useInitialTheme = (shouldApplyTheme: boolean) => {
   if (!shouldApplyTheme) return;
 
   useEffect(() => {
-    const isDarkMode = darkThemeList.some((theme) =>
-      document.body.classList.contains(theme)
+    const isDarkMode = darkThemeList.some(
+      (theme) =>
+        document.body.classList.contains(theme) ||
+        document.documentElement.dataset.mode?.includes(theme)
     );
 
     updateHtmlClass(isDarkMode);
   }, []);
 };
 
-export const useBodyThemeObserver = (shouldApplyTheme: boolean) => {
+const createThemeObserver = (
+  config: ThemeObserverConfig,
+  shouldApplyTheme: boolean
+) => {
   if (!shouldApplyTheme) return;
 
   useEffect(() => {
+    const { attributeName, getIsDarkMode, targetSelector } = config;
+    const targetNode = targetSelector();
+
+    if (!targetNode) return;
+
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         if (
           mutation.type === 'attributes' &&
-          mutation.attributeName === 'class'
+          mutation.attributeName === attributeName
         ) {
-          const isDarkMode = darkThemeList.some((theme) =>
-            (mutation.target as HTMLElement).classList.contains(theme)
-          );
+          const isDarkMode = getIsDarkMode(mutation.target as HTMLElement);
           updateHtmlClass(isDarkMode);
         }
       });
     });
 
-    const config = { attributes: true, attributeFilter: ['class'] };
-    const targetNode = document.body;
+    observer.observe(targetNode, {
+      attributes: true,
+      attributeFilter: [attributeName],
+    });
 
-    if (targetNode) {
-      observer.observe(targetNode, config);
-    }
-
-    return () => {
-      if (targetNode) {
-        observer.disconnect();
-      }
-    };
+    return () => observer.disconnect();
   }, []);
+};
+
+export const useBodyThemeObserver = (shouldApplyTheme: boolean) => {
+  createThemeObserver(
+    {
+      attributeName: 'class',
+      getIsDarkMode: (target) =>
+        darkThemeList.some((theme) => target.classList.contains(theme)),
+      targetSelector: () => document.body,
+    },
+    shouldApplyTheme
+  );
+};
+
+export const useHTMLThemeObserver = (shouldApplyTheme: boolean) => {
+  createThemeObserver(
+    {
+      attributeName: 'data-mode',
+      getIsDarkMode: (target) =>
+        darkThemeList.some((theme) => target.dataset.mode?.includes(theme)),
+      targetSelector: () => document.documentElement,
+    },
+    shouldApplyTheme
+  );
 };

@@ -6,62 +6,55 @@ export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
   const [elements, setElements] = useState<Element[]>([]);
 
   useEffect(() => {
-    function findElementsByAttribute() {
-      const selector = `[data-message-author-role="${role}"]`;
-      const foundElements = document.querySelectorAll<HTMLElement>(selector);
-      setElements(Array.from(foundElements));
-    }
-
-    const findElementsByClassName = () => {
-      const getGrokRoleElements = (
-        role: ChatNodeRoleType,
-        elements: Element[]
-      ) => {
-        // grok user message is on even indexes, assistant message is on odd indexes
-        return role === 'user'
-          ? elements.filter((_, index) => index % 2 === 0)
-          : elements.filter((_, index) => index % 2 === 1);
-      };
-
-      const classNames: Partial<Record<typeof siteOrigin, string>> = {
-        gemini: role === 'user' ? 'query-content' : 'model-response-text',
-        deepSeek: role === 'user' ? 'fbb737a4' : 'f9bf7997',
-        grok: 'message-row',
-      };
-      const className = classNames[siteOrigin] || '';
-      const foundElements = document.getElementsByClassName(className);
-      const foundElementsArray = Array.from(foundElements);
-
-      if (siteOrigin === 'grok') {
-        setElements(getGrokRoleElements(role, foundElementsArray));
-      } else {
-        setElements(foundElementsArray);
-      }
+    const attributes: Partial<Record<typeof siteOrigin, string>> = {
+      chatGPT: `[data-message-author-role="${role}"]`,
     };
 
-    if (siteOrigin === 'chatGPT') {
-      findElementsByAttribute();
-    } else {
-      findElementsByClassName();
-    }
+    const classNames: Partial<Record<typeof siteOrigin, string>> = {
+      gemini: role === 'user' ? 'query-content' : 'model-response-text',
+      deepSeek: role === 'user' ? 'fbb737a4' : 'f9bf7997',
+      grok: 'message-row',
+      claude: role === 'user' ? 'font-user-message' : 'font-claude-message',
+    };
 
-    // Optional: Add mutation observer to update elements when DOM changes
-    const observerCallback =
-      siteOrigin === 'chatGPT'
-        ? findElementsByAttribute
-        : findElementsByClassName;
-    const observer = new MutationObserver(observerCallback);
+    const getElementsByAttribute = () => {
+      return Array.from(
+        document.querySelectorAll<HTMLElement>(attributes[siteOrigin] || '')
+      );
+    };
 
+    const getElementsByClassName = () => {
+      const foundElements = Array.from(
+        document.getElementsByClassName(classNames[siteOrigin] || '')
+      );
+
+      if (siteOrigin === 'grok') {
+        return foundElements.filter((_, index) =>
+          role === 'user' ? index % 2 === 0 : index % 2 === 1
+        );
+      }
+
+      return foundElements;
+    };
+
+    const updateElements = () => {
+      setElements(
+        siteOrigin === 'chatGPT'
+          ? getElementsByAttribute()
+          : getElementsByClassName()
+      );
+    };
+
+    updateElements();
+
+    const observer = new MutationObserver(updateElements);
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
     });
 
-    // Cleanup observer on component unmount
-    return () => {
-      observer.disconnect();
-    };
+    return () => observer.disconnect();
   }, [role]);
 
   return elements;

@@ -37,6 +37,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
         undefined,
       deepSeek: document.getElementsByClassName('f6004764')[0],
       grok: document.getElementsByClassName('scrollbar-gutter-stable')[0],
+      claude: document.getElementsByClassName('overflow-y-scroll')[0],
     };
 
     return parent[siteOrigin];
