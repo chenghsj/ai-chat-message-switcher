@@ -13,7 +13,7 @@ export function useGetElementByOrigin(role: ChatNodeRoleType): Element[] {
     const classNames: Partial<Record<typeof siteOrigin, string>> = {
       gemini: role === 'user' ? 'query-content' : 'model-response-text',
       deepSeek: role === 'user' ? 'fbb737a4' : 'f9bf7997',
-      grok: 'message-row',
+      grok: 'message-bubble',
       claude: role === 'user' ? 'font-user-message' : 'font-claude-message',
     };
 

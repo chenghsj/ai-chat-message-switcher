@@ -29,7 +29,7 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     nodes: roleNodes,
     role,
   } = useChatNode();
-  const parentElement = useMemo(() => {
+  const scrollContainer = useMemo(() => {
     const parent: Partial<Record<typeof siteOrigin, Element>> = {
       chatGPT: document.getElementsByClassName('[scrollbar-gutter:stable]')[0],
       gemini:
@@ -58,7 +58,8 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
     index: number,
     block: ScrollLogicalPosition
   ) => {
-    node?.scrollIntoView({ behavior: 'auto', block });
+    // Fix: click message not work when the scrollbar is at the bottom in grok, and panel click not work either
+    node?.scrollIntoView({ behavior: 'instant', block });
     setClickNodeIndex(index); // Update the state to mark this node as clicked
   };
 
@@ -117,13 +118,13 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
       setTriggerType('window-scroll');
     }, 200);
 
-    parentElement?.addEventListener('scroll', handleScroll, { signal });
+    scrollContainer?.addEventListener('scroll', handleScroll, { signal });
 
     return () => {
       controller.abort();
     };
   }, [
-    parentElement,
+    scrollContainer,
     roleNodes,
     setClickNodeIndex,
     setTriggerType,
