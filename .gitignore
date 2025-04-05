@@ -390,3 +390,17 @@ $RECYCLE.BIN/
 public/manifest.json
 
 /vite.config.ts.timestamp*
+
+# Playwright specific
+/playwright-report/
+/test-results/
+/playwright-report/
+/playwright/.cache/
+/user-data-dir/
+/screenshots/
+/videos/
+/artifacts/
+/traces/
+*.png
+*.mp4
+*.webm

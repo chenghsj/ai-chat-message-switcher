@@ -9,7 +9,14 @@
   },
   "scripts": {
     "build": "vite build",
-    "dev": "nodemon"
+    "dev": "nodemon",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:chatgpt": "playwright test tests/chatgpt.spec.ts",
+    "test:claude": "playwright test tests/claude.spec.ts",
+    "test:gemini": "playwright test tests/gemini.spec.ts",
+    "test:with-auth": "playwright test --storage-state=auth.json",
+    "save-auth-state": "npx playwright chromium --user-data-dir=./user-data"
   },
   "type": "module",
   "dependencies": {
@@ -31,6 +38,7 @@
   },
   "devDependencies": {
     "@crxjs/vite-plugin": "2.0.0-beta.26",
+    "@playwright/test": "^1.51.1",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
     "@types/chrome": "^0.0.268",
     "@types/node": "^20.12.11",
