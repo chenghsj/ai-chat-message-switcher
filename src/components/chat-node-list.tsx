@@ -31,7 +31,9 @@ export const ChatNodeList: React.FC<ChatNodeProps> = () => {
   } = useChatNode();
   const scrollContainer = useMemo(() => {
     const parent: Partial<Record<typeof siteOrigin, Element>> = {
-      chatGPT: document.getElementsByClassName('[scrollbar-gutter:stable]')[0],
+      chatGPT: document.getElementsByClassName(
+        ' [scrollbar-gutter:stable_both-edges]'
+      )[0],
       gemini:
         document.querySelector('[data-test-id="chat-history-container"]') ||
         undefined,
