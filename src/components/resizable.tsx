@@ -18,10 +18,10 @@ interface ResizableComponentProps {
 const getHandleClasses = (resizeHandle: ResizeHandle) => {
   const baseClasses = 'absolute h-4 w-4';
   const specificClasses: Record<ResizeHandle, string> = {
-    s: 'left-1/2 w-[90%] -translate-x-1/2 bottom-0 cursor-row-resize',
-    n: 'left-1/2 w-[90%] -translate-x-1/2 top-0 cursor-row-resize',
-    w: 'top-1/2 h-[90%] -translate-y-1/2 left-0 cursor-col-resize',
-    e: 'top-1/2 h-[90%] -translate-y-1/2 right-0 cursor-col-resize',
+    s: 'w-[90%] bottom-0 cursor-row-resize',
+    n: 'w-[90%] top-0 cursor-row-resize',
+    w: 'h-[90%] left-0 cursor-col-resize',
+    e: 'h-[90%] right-0 cursor-col-resize',
     sw: 'left-0 bottom-0 cursor-nesw-resize',
     se: 'right-0 bottom-0 cursor-nwse-resize',
     nw: 'left-0 top-0 cursor-nwse-resize',
